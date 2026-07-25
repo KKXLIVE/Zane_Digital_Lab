@@ -1,14 +1,12 @@
-# Aurora
+# Aurora_kukuxin
 
-精致、温暖、有呼吸感的个人空间。
+以代码探索未来，以创造连接世界 ❀。
 
-Aurora 是一款为 Halo 2.0 打造的博客主题，注重阅读体验与视觉细节，提供丰富的插件页面支持和灵活的后台配置。
+Aurora_kukuxin 博客主题修改于Aurora 原作者冬季限定栖（加入QQ群https://qm.qq.com/q/dbqrRmp9Qc），注重阅读体验与视觉细节，提供丰富的插件页面支持和灵活的后台配置。
 
-> **预览站**：[https://www.halosb.com](https://www.halosb.com)
->
-> **交流群**：[加入 QQ 群](https://qm.qq.com/q/dbqrRmp9Qc)
->
-> **反馈邮箱**：[i@halosb.com](mailto:i@halosb.com)
+> **预览站**：[https://zanecarter.top/]
+> **反馈邮箱**：[kukuxin@petalmail.com]
+>  **个人QQ**：2665545314
 
 ---
 
