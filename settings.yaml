@@ -1,0 +1,434 @@
+apiVersion: v1alpha1
+kind: Setting
+metadata:
+  name: theme-aurora-setting
+spec:
+  forms:
+    - group: theme_mode_group
+      label: 主题默认模式
+      formSchema:
+        - $formkit: radio
+          name: theme_mode
+          id: theme_mode
+          label: 主题默认模式
+          value: system
+          options:
+            - value: light
+              label: 浅色模式
+            - value: dark
+              label: 深色模式
+            - value: system
+              label: 跟随系统
+        - $formkit: checkbox
+          name: show_login_btn
+          label: 显示登录按钮
+          value: true
+          help: "开启后在导航栏右侧显示登录按钮，点击跳转至后台管理"
+
+    - group: hero
+      label: 首页背景
+      formSchema:
+        - $formkit: text
+          name: hero_title
+          label: 大标题
+          value: "Aurora"
+        - $formkit: text
+          name: hero_subtitle
+          label: 副标题
+          value: "用文字记录思考，用代码构建世界"
+        - $formkit: select
+          name: hero_bg_mode
+          label: 背景模式
+          value: none
+          help: "选择首页顶部的背景展示模式。选择后下方对应的上传项会自动展开"
+          options:
+            - value: none
+              label: 纯色（默认，不启用背景图/视频）
+            - value: video
+              label: 背景视频
+            - value: image
+              label: 单张背景图片
+            - value: image-reveal
+              label: 双图擦除（鼠标经过显示底图）
+            - value: video-reveal
+              label: 视频+双图擦除（视频背景+图片擦除叠加）
+        - $formkit: attachment
+          name: hero_video
+          label: 背景视频文件
+          accepts:
+            - "video/*"
+          help: "上传背景视频文件，建议体积不超过 20MB，将自动循环静音播放"
+        - $formkit: text
+          name: hero_video_url
+          label: 背景视频外链
+          placeholder: "https://example.com/bg.mp4"
+          help: "填写视频 URL，优先级低于上传。支持 MP4/WebM 格式"
+        - $formkit: attachment
+          name: hero_image
+          label: "背景图片（单图模式）"
+          accepts:
+            - "image/*"
+          help: "上传背景图片，建议 1920x1080 以上"
+        - $formkit: text
+          name: hero_image_url
+          label: "背景图片外链"
+          placeholder: "https://example.com/bg.jpg"
+          help: "外部图片链接，优先级低于上传"
+        - $formkit: attachment
+          name: hero_image_top
+          label: "前景图片（擦除模式，鼠标扫过时被擦除）"
+          accepts:
+            - "image/*"
+          help: "上传前景图片，鼠标扫过时以光标为圆心擦除，露出底层图片"
+        - $formkit: text
+          name: hero_image_top_url
+          label: "前景图片外链"
+          placeholder: "https://example.com/top.jpg"
+          help: "外部链接，优先级低于上传"
+        - $formkit: attachment
+          name: hero_image_bottom
+          label: "底层图片（擦除模式，擦除后露出）"
+          accepts:
+            - "image/*"
+          help: "上传底层图片，鼠标擦除前景后露出的图片"
+        - $formkit: text
+          name: hero_image_bottom_url
+          label: "底层图片外链"
+          placeholder: "https://example.com/bottom.jpg"
+          help: "外部链接，优先级低于上传"
+        - $formkit: number
+          name: hero_reveal_size
+          label: "擦除圆半径（px）"
+          value: 100
+          min: 30
+          max: 300
+          help: "鼠标擦除时圆形区域的像素半径，越大擦除范围越广。仅 image-reveal 模式生效"
+        - $formkit: number
+          name: hero_overlay
+          label: 遮罩透明度
+          value: 0.3
+          min: 0
+          max: 1
+          step: 0.1
+          help: "背景遮罩透明度，0 为完全透明，1 为完全不透明。仅视频/图片模式生效"
+
+    - group: footer
+      label: 页脚设置
+      formSchema:
+        - $formkit: text
+          name: icp_number
+          label: ICP 备案号
+          placeholder: "沪ICP备xxxxxx号"
+          help: "填写后将在页脚显示，自动跳转至工信部备案查询网站"
+        - $formkit: text
+          name: police_number
+          label: 公安备案号
+          placeholder: "XX公网安备xxxxxxxx号"
+          help: "填写后将在页脚显示，自动拼接公安备案查询链接"
+        - $formkit: textarea
+          name: custom_html
+          label: 自定义 HTML 内容
+          help: "将在页脚底部显示，支持 HTML 代码。可用于添加自定义文本、图片、统计代码等"
+          placeholder: "<a href='https://example.com'>友情链接</a>"
+
+    - group: links
+      label: 友链页面
+      formSchema:
+        - $formkit: textarea
+          name: apply_content
+          label: 申请友链说明（HTML）
+          help: "显示在「申请友链」Tab 中，支持 HTML。不填则使用默认文案"
+        - $formkit: text
+          name: my_title
+          label: 我的站点名称
+          help: "显示在「我的博客信息」Tab 中，不填则自动使用站点名称"
+        - $formkit: text
+          name: my_url
+          label: 我的站点地址
+          help: "不填则自动使用站点 URL"
+        - $formkit: text
+          name: my_logo
+          label: 我的站点 Logo
+          help: "不填则自动使用站点 Logo"
+        - $formkit: text
+          name: my_desc
+          label: 我的站点描述
+          help: "不填则自动使用站点副标题"
+        - $formkit: text
+          name: my_rss
+          label: 我的 RSS 地址
+          value: "/rss.xml"
+          help: "默认 /rss.xml"
+        - $formkit: switch
+          name: enable_submit
+          id: enable_submit
+          label: 启用自主提交
+          value: false
+          help: "开启后访客可自助提交友链申请（需安装 LinksSubmit 插件）"
+        - $formkit: select
+          name: verify_type
+          label: 验证方式
+          value: email
+          help: "选择提交时的验证方式（仅一种）"
+          if: "$get(enable_submit).value === true"
+          options:
+            - label: 邮箱验证码
+              value: email
+            - label: 图形验证码
+              value: captcha
+            - label: 无需验证
+              value: none
+        - $formkit: switch
+          name: enable_update
+          label: 允许修改友链
+          value: false
+          help: "开启后已提交的友链可凭邮箱验证修改信息"
+          if: "$get(enable_submit).value === true"
+
+    - group: seo
+      label: SEO
+      formSchema:
+        - $formkit: text
+          name: ga_id
+          label: Google Analytics ID
+        - $formkit: textarea
+          name: meta_description
+          label: Meta Description
+          value: "Aurora — 精致、温暖、有呼吸感的个人空间"
+
+    - group: post
+      label: 文章设置
+      formSchema:
+        - $formkit: checkbox
+          name: show_excerpt
+          label: 显示文章摘要
+          value: true
+          help: "在文章正文上方显示摘要"
+        - $formkit: group
+          name: excerpt
+          label: 打字机摘要设置
+          formSchema:
+            - $formkit: checkbox
+              name: animation
+              label: 启用打字机动画
+              value: true
+            - $formkit: number
+              name: speed
+              label: 打字速度（毫秒/字）
+              value: 50
+              min: 10
+              max: 500
+            - $formkit: text
+              name: caret
+              label: 光标符号
+              value: "_"
+              help: "打字时的光标闪烁符号"
+        - $formkit: group
+          name: outdated_notice
+          label: 过时文章提示
+          formSchema:
+            - $formkit: checkbox
+              name: enabled
+              label: 启用
+              value: true
+            - $formkit: number
+              name: days
+              label: 提醒天数阈值
+              value: 180
+              min: 1
+              max: 3650
+              help: "文章发布超过此天数后显示过时提醒"
+            - $formkit: text
+              name: message
+              label: 提醒文案
+              value: "本文发布于 {days} 天前，内容可能已过时，请注意甄别。"
+              help: "使用 {days} 占位符表示已过天数"
+
+    - group: photos
+      label: 图库设置
+      formSchema:
+        - $formkit: text
+          name: title
+          label: 页面标题
+          value: "📷 图库"
+          help: "显示在图库页面顶部"
+        - $formkit: text
+          name: description
+          label: 页面描述
+          value: "记录生活中的美好瞬间"
+          help: "显示在图库页面标题下方"
+        - $formkit: select
+          name: layout
+          label: 布局样式
+          value: grid
+          help: "选择照片的展示布局"
+          options:
+            - value: grid
+              label: 网格布局
+            - value: masonry
+              label: 瀑布流布局
+            - value: cards
+              label: 卡片布局
+        - $formkit: number
+          name: items_per_page
+          label: 每页显示数量
+          value: 24
+          min: 6
+          max: 60
+          help: "每页显示的照片数量"
+
+    - group: moments
+      label: 瞬间设置
+      formSchema:
+        - $formkit: text
+          name: title
+          label: 页面标题
+          value: "💬 瞬间"
+          help: "显示在瞬间页面顶部"
+        - $formkit: text
+          name: description
+          label: 页面描述
+          value: "记录生活中的点滴瞬间"
+          help: "显示在瞬间页面标题下方"
+        - $formkit: select
+          name: template
+          label: 模板样式
+          value: card
+          help: "选择瞬间页面的展示模板"
+          options:
+            - value: card
+              label: 卡片模式（默认）
+            - value: list
+              label: 列表模式
+        - $formkit: attachment
+          if: "$get(template).value === 'list'"
+          name: banner_image
+          label: Banner 背景图
+          accepts:
+            - "image/*"
+          help: "Banner 背景图片，仅列表模式生效"
+        - $formkit: text
+          if: "$get(template).value === 'list'"
+          name: banner_desc
+          label: Banner 描述
+          value: "记录生活中的点滴瞬间。"
+          help: "仅列表模式生效"
+
+    - group: docs
+      label: 文档设置
+      formSchema:
+        - $formkit: text
+          name: title
+          label: 页面标题
+          value: "📚 文档"
+          help: "显示在文档页面顶部"
+        - $formkit: text
+          name: description
+          label: 页面描述
+          value: ""
+          help: "显示在文档页面标题下方"
+        - $formkit: switch
+          name: enable_template
+          label: 启用主题模板
+          value: true
+          help: "开启后使用主题模板，关闭后使用默认模板"
+        - $formkit: switch
+          name: enable_h1
+          label: 在文档内容启用 H1 标题
+          value: true
+          help: "开启后文档内容将显示 H1 标题"
+
+    - group: friends
+      label: 朋友圈设置
+      formSchema:
+        - $formkit: text
+          name: title
+          label: 页面标题
+          value: "朋友圈"
+          help: "显示在朋友圈页面顶部"
+        - $formkit: text
+          name: description
+          label: 页面描述
+          value: "发现更多有趣的博主。"
+          help: "显示在朋友圈页面标题下方"
+        - $formkit: select
+          name: template
+          label: 模板样式
+          value: card
+          help: "选择朋友圈页面的展示模板"
+          options:
+            - value: card
+              label: 卡片模式（默认）
+            - value: list
+              label: 多列网格模式
+        - $formkit: select
+          if: "$get(template).value === 'list'"
+          name: columns
+          label: 网格列数
+          value: "3"
+          help: "每行显示的卡片数量"
+          options:
+            - value: "3"
+              label: 三列
+            - value: "4"
+              label: 四列
+            - value: "5"
+              label: 五列
+            - value: custom
+              label: 自定义
+        - $formkit: number
+          if: "$get(template).value === 'list' && $get(columns).value === 'custom'"
+          name: columns_custom
+          label: 自定义列数
+          value: 3
+          min: 2
+          max: 8
+          help: "输入每行显示的卡片数量（2~8）"
+        - $formkit: attachment
+          if: "$get(template).value === 'list'"
+          name: banner_image
+          label: Banner 背景图
+          accepts:
+            - "image/*"
+          help: "Banner 背景图片"
+        - $formkit: text
+          if: "$get(template).value === 'list'"
+          name: banner_desc
+          label: Banner 描述
+          value: "发现更多有趣的博主。"
+          help: ""
+
+    - group: steam
+      label: Steam 设置
+      formSchema:
+        - $formkit: text
+          name: steam_id
+          label: Steam 64 位 ID
+          help: "填写你的 Steam 64 位 ID"
+        - $formkit: switch
+          name: show_profile
+          label: 显示个人资料
+          value: true
+          help: "在 Steam 页面顶部显示个人资料卡片"
+        - $formkit: switch
+          name: show_stats
+          label: 显示游戏时长统计
+          value: true
+          help: "显示游戏时长统计信息"
+        - $formkit: switch
+          name: show_recent_games
+          label: 显示最近游玩
+          value: true
+          help: "显示最近玩过的游戏列表"
+        - $formkit: switch
+          name: show_games_grid
+          label: 显示游戏库
+          value: true
+          help: "显示所有游戏列表"
+        - $formkit: number
+          name: games_limit
+          label: 游戏列表数量限制
+          value: 30
+          min: 6
+          max: 200
+          help: "游戏库中最多显示的游戏数量"
