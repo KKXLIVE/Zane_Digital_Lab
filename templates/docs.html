@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{layout :: html(head = null, content = ~{::content})}">
+<th:block th:fragment="content">
+  <div class="page-header docs-header">
+    <h1 class="page-title" data-i18n-key="docs_title">📚 文档</h1>
+    <p class="page-desc" th:if="${theme.config.docs?.description}" th:text="${theme.config.docs?.description}"></p>
+  </div>
+
+  <!-- 文档项目列表 -->
+  <div class="docs-grid">
+    <th:block th:if="${projects != null and not #lists.isEmpty(projects)}">
+      <a th:each="project : ${projects}"
+         th:href="@{${project.status.permalink}}"
+         class="docs-card">
+        <div class="docs-card-icon">
+          <img th:if="${project.spec.icon}" th:src="${project.spec.icon}" th:alt="${project.spec.displayName}" />
+          <span th:unless="${project.spec.icon}">📄</span>
+        </div>
+        <div class="docs-card-body">
+          <h3 class="docs-card-title" th:text="${project.spec.displayName}">项目名称</h3>
+          <p class="docs-card-desc" th:if="${project.spec.description}" th:text="${project.spec.description}">项目描述</p>
+        </div>
+      </a>
+    </th:block>
+  </div>
+
+  <div class="empty-state" th:if="${projects == null or #lists.isEmpty(projects)}">
+    <p data-i18n-key="docs_empty">暂无文档项目</p>
+    <p data-i18n-key="docs_hint">请安装并配置「文档」插件</p>
+  </div>
+
+</th:block>
+</html>

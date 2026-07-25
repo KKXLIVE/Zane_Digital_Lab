@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{layout :: html(head = null, content = ~{::content})}">
+<th:block th:fragment="content">
+  <div class="page-card-wrap">
+    <div class="page-card-inner">
+      <!-- 页眉 -->
+      <div class="page-card-head">
+        <div class="page-card-head-icon" aria-hidden="true">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+            <line x1="8" y1="21" x2="16" y2="21"/>
+            <line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+        </div>
+        <h1 class="page-card-title" th:text="${singlePage.spec.title}">项目展示</h1>
+        <p class="page-card-desc" th:if="${singlePage.spec.excerpt?.raw}" th:text="${singlePage.spec.excerpt?.raw}"></p>
+      </div>
+
+      <!-- 内容卡片 -->
+      <div class="page-card-body" th:if="${singlePage.content != null and singlePage.content.content != null and !#strings.isEmpty(singlePage.content.content)}">
+        <div class="post-body tp" th:utext="${singlePage.content.content}"></div>
+      </div>
+
+      <!-- 评论区 -->
+      <th:block th:if="${singlePage.metadata != null and singlePage.metadata.name != null}">
+        <div class="page-card-comments" id="comments">
+          <div class="page-card-comments-hd">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span data-i18n-key="comments_title">评论区</span>
+          </div>
+          <th:block th:replace="~{modules/common/comment :: comment(title='评论区', haloComment=${ {group: 'content.halo.run', kind: 'SinglePage', name: singlePage.metadata.name} })}"></th:block>
+        </div>
+      </th:block>
+    </div>
+  </div>
+</th:block>
+</html>

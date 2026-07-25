@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{layout :: html(head = null,content = ~{::content})}">
+<th:block th:fragment="content">
+  <div class="lh">
+    <span class="lh-badge" data-i18n-key="archives_badge">归档</span>
+    <h1 class="lh-title" data-i18n-key="archives_title">时间线</h1>
+  </div>
+  <div class="archives">
+    <th:block th:each="archive : ${archives.items}">
+      <div class="arch-yr">
+        <h2 class="arch-yr-title" th:text="${archive.year}">2024</h2>
+        <th:block th:each="month : ${archive.months}">
+          <div class="arch-mo"
+               data-i18n-yearmonth
+               th:attr="data-year=${archive.year},data-month=${month.month}"
+               th:text="${archive.year} + ' 年 ' + ${month.month} + ' 月'"></div>
+          <div class="arch-post" th:each="post : ${month.posts}">
+            <time class="arch-dt"
+                  data-i18n-short="true"
+                  th:attr="data-i18n-date=${post.spec.publishTime}"
+                  th:text="${#temporals.format(post.spec.publishTime, 'MM.dd')}">01.01</time>
+            <a class="arch-tl" th:href="@{${post.status.permalink}}" th:text="${post.spec.title}">标题</a>
+          </div>
+        </th:block>
+      </div>
+    </th:block>
+  </div>
+  <nav class="pager" th:if="${archives.totalPages > 1}">
+    <a class="pager-btn" th:if="${archives.hasPrevious()}" th:href="@{${archives.prevUrl}}"
+       data-i18n-key="prev_page">← 上一页</a>
+    <span class="pager-info"
+          data-i18n-key="archives_page"
+          th:attr="data-i18n-param-page=${archives.page}"
+          th:text="'第 ' + ${archives.page} + ' 页'"></span>
+    <a class="pager-btn" th:if="${archives.hasNext()}" th:href="@{${archives.nextUrl}}"
+       data-i18n-key="next_page">下一页 →</a>
+  </nav>
+</th:block>
+</html>

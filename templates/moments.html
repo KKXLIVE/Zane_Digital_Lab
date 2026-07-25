@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{layout :: html(head = null, content = ~{::content})}">
+<th:block th:fragment="content" th:with="momentsConfig=${theme.config.moments}, hasMoments=${moments != null and not #lists.isEmpty(moments.items)}">
+
+  <!--/* ========== 卡片模式（默认） ========== */-->
+  <th:block th:if="${momentsConfig == null or momentsConfig.template == null or momentsConfig.template == 'card'}">
+    <div class="page-header">
+      <div class="page-title-row">
+        <h1 class="page-title" th:text="${momentsConfig?.title ?: '💬 瞬间'}">💬 瞬间</h1>
+        <a th:if="${hasMoments}" th:href="@{/moments/rss.xml}" class="page-action-link" target="_blank" rel="noopener">
+          RSS 订阅
+        </a>
+      </div>
+      <p class="page-desc" th:if="${momentsConfig?.description}" th:text="${momentsConfig?.description}"></p>
+    </div>
+
+    <!-- 瞬间标签 -->
+    <th:block th:if="${tags != null and not #lists.isEmpty(tags)}">
+      <div class="moments-tags-wrapper">
+        <nav class="moments-tags">
+          <a th:href="@{/moments}" class="tag-item" th:classappend="${#lists.isEmpty(param.tag)} ? 'active' : ''">
+            全部 <span class="tag-count" th:text="${hasMoments ? moments.total : 0}">0</span>
+          </a>
+          <a th:each="tag : ${tags}"
+             th:href="|/moments?tag=${tag.name}|"
+             class="tag-item"
+             th:classappend="${#lists.contains(param.tag, tag.name)} ? 'active' : ''">
+            <span th:text="${tag.name}">标签</span>
+            <span class="tag-count" th:text="${tag.momentCount}">0</span>
+          </a>
+        </nav>
+      </div>
+    </th:block>
+
+    <div class="moments-list proper-height">
+      <th:block th:if="${hasMoments}">
+        <article class="moment-card" th:each="moment,iterStat : ${moments.items}"
+                 th:with="content=${moment.spec.content}"
+                 th:style="'--delay: ' + ${iterStat.index * 0.05} + 's'">
+          <header class="moment-card-header">
+            <div th:if="${moment.owner != null}" class="moment-author-info">
+              <img th:if="${moment.owner.avatar != null}"
+                   th:src="${moment.owner.avatar}" th:alt="${moment.owner.displayName}"
+                   class="moment-avatar" loading="lazy" />
+              <span class="moment-author-name" th:text="${moment.owner.displayName}">作者</span>
+            </div>
+            <time class="moment-time" th:datetime="${moment.spec.releaseTime}"
+                  th:title="${#temporals.format(moment.spec.releaseTime, 'yyyy-MM-dd HH:mm')}">
+              <span th:text="${#temporals.format(moment.spec.releaseTime, 'yyyy-MM-dd')}">日期</span>
+            </time>
+          </header>
+
+          <div class="moment-body">
+            <div th:if="${not #strings.isEmpty(content.html)}" class="moment-text" th:utext="${content.html}"></div>
+            <th:block th:replace="~{modules/moment/common :: media}"></th:block>
+          </div>
+
+          <footer class="moment-card-footer">
+            <div th:if="${not #lists.isEmpty(moment.spec.tags)}" class="moment-tags">
+              <a th:each="tag : ${moment.spec.tags}" th:href="|/moments?tag=${tag}|" class="moment-tag">
+                <span>#</span><span th:text="${tag}">标签</span>
+              </a>
+            </div>
+            <div class="moment-actions">
+              <th:block th:replace="~{modules/moment/common :: like-button}"></th:block>
+              <button class="action-btn comment" title="评论"
+                      onclick="this.closest('.moment-card').querySelector('.moment-comment')?.classList.toggle('show')">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                <span th:text="${moment.stats.approvedComment ?: 0}">0</span>
+              </button>
+              <th:block th:replace="~{modules/moment/common :: share-button(url=|/moments/${moment.metadata.name}|)}"></th:block>
+            </div>
+          </footer>
+
+          <div class="moment-comment" th:id="|comment-${moment.metadata.name}|">
+            <div class="comment-header">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+              <span>评论</span>
+            </div>
+            <halo:comment group="moment.halo.run" kind="Moment" th:attr="name=${moment.metadata.name}" />
+          </div>
+        </article>
+
+        <th:block th:replace="~{modules/pagination :: pagination(data=${moments})}"></th:block>
+      </th:block>
+
+      <div class="empty-state" th:if="${not hasMoments}">
+        <p data-i18n-key="moments_empty">暂无瞬间</p>
+        <p data-i18n-key="moments_hint">请安装并配置「瞬间」插件</p>
+      </div>
+    </div>
+  </th:block>
+
+  <!--/* ========== 列表模式 ========== */-->
+  <th:block th:if="${momentsConfig != null and momentsConfig.template == 'list'}">
+    <div class="moments-banner"
+         th:style="${momentsConfig.banner_image != null and momentsConfig.banner_image != ''} ? 'background-image: url(' + ${momentsConfig.banner_image} + ')' : ''">
+      <div class="moments-banner-content">
+        <h1 class="moments-banner-title" th:text="${momentsConfig.title ?: '💬 瞬间'}">💬 瞬间</h1>
+        <div class="moments-banner-bottom">
+          <p class="moments-banner-desc" th:text="${momentsConfig.banner_desc ?: '记录生活中的点滴瞬间。'}">记录生活中的点滴瞬间。</p>
+          <div class="moments-banner-meta">
+            <span class="moments-banner-count" th:if="${hasMoments}">
+              <strong th:text="${moments.total}"></strong> 条瞬间
+            </span>
+            <a href="/moments/rss.xml" class="moments-banner-rss" title="RSS 订阅" target="_blank" rel="noopener">RSS</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 标签筛选栏 -->
+    <div class="moments-list-tags" th:if="${tags != null and not #lists.isEmpty(tags)}">
+      <nav class="moments-tags">
+        <a th:href="@{/moments}" class="tag-item" th:classappend="${#lists.isEmpty(param.tag)} ? 'active' : ''">全部</a>
+        <a th:each="tag : ${tags}" th:href="|/moments?tag=${tag.name}|" class="tag-item"
+           th:classappend="${#lists.contains(param.tag, tag.name)} ? 'active' : ''">
+          <span th:text="${tag.name}">标签</span>
+        </a>
+      </nav>
+    </div>
+
+    <div class="page-moments-list proper-height">
+      <div class="moment-list-items">
+        <th:block th:if="${hasMoments}">
+          <article class="moment-list-item" th:each="moment,iterStat : ${moments.items}"
+                   th:with="content=${moment.spec.content}"
+                   th:style="'--delay: ' + ${iterStat.index * 0.05} + 's'">
+            <div class="moment-list-meta">
+              <img th:if="${moment.owner != null and moment.owner.avatar != null}"
+                   th:src="${moment.owner.avatar}" th:alt="${moment.owner.displayName}"
+                   class="moment-list-avatar" loading="lazy" />
+              <span th:unless="${moment.owner != null and moment.owner.avatar != null}" class="moment-list-avatar-placeholder">👤</span>
+              <div class="moment-list-info">
+                <div class="moment-list-nick">
+                  <span th:text="${moment.owner?.displayName ?: site.title}">作者</span>
+                </div>
+                <time class="moment-list-date" th:datetime="${moment.spec.releaseTime}"
+                      th:text="${#temporals.format(moment.spec.releaseTime, 'yyyy-MM-dd HH:mm')}">时间</time>
+              </div>
+            </div>
+
+            <div class="moment-list-content">
+              <div th:if="${not #strings.isEmpty(content.html)}" class="moment-text" th:utext="${content.html}"></div>
+              <th:block th:replace="~{modules/moment/common :: media}"></th:block>
+            </div>
+
+            <div class="moment-list-bottom">
+              <div th:if="${not #lists.isEmpty(moment.spec.tags)}" class="moment-list-tags">
+                <a th:each="tag : ${moment.spec.tags}" th:href="|/moments?tag=${tag}|" class="moment-list-tag">
+                  <span>#</span><span th:text="${tag}">标签</span>
+                </a>
+              </div>
+              <div class="moment-actions">
+                <th:block th:replace="~{modules/moment/common :: like-button}"></th:block>
+                <button class="action-btn comment" title="评论"
+                        onclick="this.closest('.moment-list-item').querySelector('.moment-comment')?.classList.toggle('show')">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                  </svg>
+                  <span th:text="${moment.stats.approvedComment ?: 0}">0</span>
+                </button>
+                <th:block th:replace="~{modules/moment/common :: share-button(url=|/moments/${moment.metadata.name}|)}"></th:block>
+              </div>
+            </div>
+
+            <div class="moment-comment" th:id="|comment-${moment.metadata.name}|">
+              <div class="comment-header">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                <span>评论</span>
+              </div>
+              <halo:comment group="moment.halo.run" kind="Moment" th:attr="name=${moment.metadata.name}" />
+            </div>
+          </article>
+
+          <th:block th:replace="~{modules/pagination :: pagination(data=${moments})}"></th:block>
+        </th:block>
+      </div>
+
+      <div class="empty-state" th:if="${not hasMoments}">
+        <p data-i18n-key="moments_empty">暂无瞬间</p>
+        <p data-i18n-key="moments_hint">请安装并配置「瞬间」插件</p>
+      </div>
+    </div>
+  </th:block>
+
+</th:block>
+</html>

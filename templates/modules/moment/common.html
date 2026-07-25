@@ -1,0 +1,75 @@
+<th:block th:fragment="media">
+  <div
+    th:if="${not #lists.isEmpty(content.medium)}"
+    class="moment-media"
+    th:classappend="${#lists.size(content.medium) == 1 ? 'single' : (#lists.size(content.medium) == 2 ? 'double' : 'grid')}"
+  >
+    <th:block th:each="mediaItem : ${content.medium}">
+      <figure th:if="${mediaItem.type.name == 'PHOTO'}" class="media-item photo">
+        <img th:src="${mediaItem.url}" alt="瞬间图片" loading="lazy" />
+      </figure>
+
+      <figure th:if="${mediaItem.type.name == 'VIDEO'}" class="media-item video">
+        <video th:src="${mediaItem.url}" controls preload="metadata"></video>
+      </figure>
+
+      <figure th:if="${mediaItem.type.name == 'AUDIO'}" class="media-item audio">
+        <audio th:src="${mediaItem.url}" controls></audio>
+      </figure>
+    </th:block>
+  </div>
+</th:block>
+
+<th:block th:fragment="like-button">
+  <button
+    class="action-btn like"
+    title="点赞"
+    onclick="
+      (async function(btn){
+        if (btn.classList.contains('liked') || btn.classList.contains('loading')) return;
+        btn.classList.add('loading');
+        const name = btn.dataset.name;
+        const countEl = btn.querySelector('.like-count');
+        try {
+          const res = await fetch('/apis/api.halo.run/v1alpha1/trackers/upvote', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({group: 'moment.halo.run', plural: 'moments', name: name})
+          });
+          if (res.ok) {
+            btn.classList.add('liked');
+            const c = parseInt(countEl.textContent) || 0;
+            countEl.textContent = c + 1;
+            localStorage.setItem('moment-liked-' + name, 'true');
+          }
+        } catch(e) { console.error('Upvote error:', e); }
+        btn.classList.remove('loading');
+      })(this)
+    "
+    th:data-name="${moment.metadata.name}"
+  >
+    <svg class="like-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+    </svg>
+    <span class="like-count" th:text="${moment.stats.upvote ?: 0}">0</span>
+  </button>
+</th:block>
+
+<th:block th:fragment="share-button(url)">
+  <button
+    class="action-btn share"
+    title="复制链接"
+    th:attr="data-url=${url}"
+    onclick="
+      const url = this.dataset.url && this.dataset.url.trim() ? location.origin + this.dataset.url : location.href;
+      navigator.clipboard.writeText(url);
+      this.classList.add('copied');
+      setTimeout(() => this.classList.remove('copied'), 2000);
+    "
+  >
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+    </svg>
+  </button>
+</th:block>

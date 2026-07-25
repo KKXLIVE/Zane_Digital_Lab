@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{layout :: html(head = null, content = ~{::content})}">
+<th:block th:fragment="content">
+  <div class="page-header photos-header">
+    <h1 class="page-title" data-i18n-key="photos_title">📷 图库</h1>
+    <p class="page-desc" th:if="${theme.config.photos?.description}" th:text="${theme.config.photos?.description}"></p>
+  </div>
+
+  <div class="photos-container">
+    <!-- 相册分组标签 -->
+    <th:block th:if="${groups != null and not #lists.isEmpty(groups)}">
+      <div class="photo-tabs">
+        <a th:each="group : ${groups}"
+           th:href="@{${group.status.permalink}}"
+           class="photo-tab"
+           th:text="${group.spec.displayName}">分组</a>
+      </div>
+    </th:block>
+
+    <!-- 照片瀑布流 -->
+    <th:block th:if="${photos != null and not #lists.isEmpty(photos.items)}">
+      <div class="photo-grid">
+        <div class="photo-item" th:each="photo : ${photos.items}">
+          <a th:href="@{${photo.status.permalink}}" class="photo-link">
+            <img th:src="${photo.spec.url}" th:alt="${photo.spec.displayName}"
+                 loading="lazy" class="photo-img" />
+          </a>
+          <div class="photo-info" th:if="${photo.spec.displayName}">
+            <span class="photo-name" th:text="${photo.spec.displayName}">照片名称</span>
+          </div>
+        </div>
+      </div>
+      <!-- 分页 -->
+      <th:block th:replace="~{modules/pagination :: pagination(data=${photos})}"></th:block>
+    </th:block>
+
+    <!-- 空状态 -->
+    <div class="empty-state" th:if="${photos == null or #lists.isEmpty(photos.items)}">
+      <p data-i18n-key="photos_empty">暂无照片</p>
+      <p data-i18n-key="photos_hint">请安装并配置「图库」插件</p>
+    </div>
+  </div>
+
+</th:block>
+</html>

@@ -1,0 +1,12 @@
+<th:block
+  th:fragment="comment(title, haloComment)">
+  <h3 th:if="${haloCommentEnabled}" class="comment-title">
+    <span data-i18n-key="comments_title">评论</span>
+  </h3>
+  <div class="comment-body" th:if="${haloCommentEnabled}">
+    <halo:comment
+      th:if="${haloComment != null}"
+      th:attr="group=${haloComment.group}, kind=${haloComment.kind}, name=${haloComment.name}"
+    />
+  </div>
+</th:block>

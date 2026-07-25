@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{layout :: html(head = null, content = ~{::content})}">
+<th:block th:fragment="content" th:with="
+  friendsConfig=${theme.config.friends},
+  hasFriends=${friends != null and friends.items != null and not #lists.isEmpty(friends.items)},
+  gridColumns=${friendsConfig?.columns == 'custom' ? (friendsConfig?.columns_custom ?: 3) : (friendsConfig?.columns ?: 3)}">
+
+  <!--/* ========== 卡片模式（默认） ========== */-->
+  <th:block th:if="${friendsConfig == null or friendsConfig.template == null or friendsConfig.template == 'card'}">
+    <div class="f-header">
+      <div class="f-header-inner">
+        <h1 class="f-title" th:text="${friendsConfig?.title ?: '朋友圈'}">朋友圈</h1>
+        <p class="f-desc" th:if="${friendsConfig?.description}" th:text="${friendsConfig?.description}">发现更多有趣的博主。</p>
+        <span class="f-count" th:if="${hasFriends}" th:text="${friends.total} + ' 篇订阅'">0 篇订阅</span>
+      </div>
+    </div>
+
+    <div class="friends-list proper-height">
+      <th:block th:if="${hasFriends}">
+        <article th:each="friend,iterStat : ${friends.items}"
+                 th:with="spec=${friend.spec}"
+                 class="friend-card"
+                 th:style="'--delay: ' + ${iterStat.index * 0.03} + 's'">
+          <header class="friend-header">
+            <a th:href="${spec.authorUrl}" target="_blank" rel="noopener" class="author-info">
+              <img th:if="${spec.logo != null and spec.logo != ''}"
+                   th:src="${spec.logo}"
+                   th:alt="${spec.author}"
+                   class="author-avatar"
+                   loading="lazy" />
+              <span th:unless="${spec.logo != null and spec.logo != ''}" class="author-avatar-placeholder">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </span>
+              <span class="author-name" th:text="${spec.author}">作者</span>
+            </a>
+            <time th:if="${spec.pubDate != null}"
+                  class="friend-time"
+                  th:datetime="${spec.pubDate}"
+                  th:text="${#temporals.format(spec.pubDate, 'MM-dd')}">日期</time>
+          </header>
+
+          <a th:href="${spec.postLink}" target="_blank" rel="noopener" class="friend-content">
+            <h2 class="friend-title" th:text="${spec.title}">文章标题</h2>
+            <p th:if="${spec.description != null and spec.description != ''}"
+               class="friend-desc"
+               th:text="${spec.description}">描述</p>
+          </a>
+
+          <footer class="friend-footer">
+            <a th:href="${spec.postLink}" target="_blank" rel="noopener" class="read-more">
+              <span data-i18n-key="friend_read_more">阅读原文</span>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M7 17l9.2-9.2M17 17V7H7"/>
+              </svg>
+            </a>
+          </footer>
+        </article>
+
+        <th:block th:replace="~{modules/pagination :: pagination(data=${friends})}" />
+      </th:block>
+
+      <div class="empty-state" th:if="${not hasFriends}">
+        <p data-i18n-key="friends_empty">暂无动态</p>
+        <p data-i18n-key="friends_hint">请安装并配置「朋友圈」插件</p>
+      </div>
+    </div>
+  </th:block>
+
+  <!--/* ========== 多列网格模式 ========== */-->
+  <th:block th:if="${friendsConfig != null and friendsConfig.template == 'list'}">
+    <div class="f-header"
+         th:style="${friendsConfig.banner_image != null and friendsConfig.banner_image != ''} ? 'background-image: url(' + ${friendsConfig.banner_image} + ')' : ''">
+      <div class="f-header-inner">
+        <h1 class="f-title" th:text="${friendsConfig.title ?: '朋友圈'}">朋友圈</h1>
+        <p class="f-desc" th:text="${friendsConfig.banner_desc ?: '发现更多有趣的博主。'}">发现更多有趣的博主。</p>
+        <span class="f-count" th:if="${hasFriends}" th:text="${friends.total} + ' 篇订阅'">0 篇订阅</span>
+      </div>
+    </div>
+
+    <div class="f-grid proper-height"
+         th:style="'--grid-cols: ' + ${gridColumns}">
+      <th:block th:if="${hasFriends}">
+        <div th:each="friend,iterStat : ${friends.items}"
+             th:with="spec=${friend.spec}"
+             class="f-grid-card"
+             th:style="'--delay: ' + ${iterStat.index * 0.03} + 's'">
+          <div class="f-grid-card-top">
+            <a th:href="${spec.authorUrl}" target="_blank" rel="noopener" class="f-grid-avatar-link">
+              <img th:if="${spec.logo != null and spec.logo != ''}"
+                   th:src="${spec.logo}" th:alt="${spec.author}"
+                   class="f-grid-avatar" loading="lazy" />
+              <span th:unless="${spec.logo != null and spec.logo != ''}" class="f-grid-avatar-placeholder">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </span>
+            </a>
+            <a th:href="${spec.authorUrl}" target="_blank" rel="noopener" class="f-grid-author" th:text="${spec.author}">作者</a>
+          </div>
+
+          <a th:href="${spec.postLink}" target="_blank" rel="noopener" class="f-grid-body">
+            <h3 class="f-grid-title" th:text="${spec.title}">文章标题</h3>
+            <p th:if="${spec.description != null and spec.description != ''}"
+               class="f-grid-desc" th:text="${spec.description}">描述</p>
+          </a>
+
+          <div class="f-grid-bottom">
+            <time th:if="${spec.pubDate != null}"
+                  class="f-grid-date"
+                  th:datetime="${spec.pubDate}"
+                  th:text="${#temporals.format(spec.pubDate, 'yyyy-MM-dd')}">日期</time>
+            <a th:href="${spec.postLink}" target="_blank" rel="noopener" class="f-grid-link">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M7 17l9.2-9.2M17 17V7H7"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <th:block th:replace="~{modules/pagination :: pagination(data=${friends})}" />
+      </th:block>
+
+      <div class="empty-state" th:if="${not hasFriends}">
+        <p data-i18n-key="friends_empty">暂无动态</p>
+        <p data-i18n-key="friends_hint">请安装并配置「朋友圈」插件</p>
+      </div>
+    </div>
+  </th:block>
+
+</th:block>
+</html>

@@ -1,0 +1,39 @@
+<th:block th:fragment="doc-tree">
+  <!-- 文档树侧边栏 -->
+  <aside class="doc-tree-sidebar" th:if="${docTrees != null and not #lists.isEmpty(docTrees)}">
+    <nav class="doc-tree-nav">
+      <ul class="doc-tree-list">
+        <th:block th:each="treeItem : ${docTrees}">
+          <li class="doc-tree-item" th:replace="~{this :: doc-tree-node(${treeItem})}"></li>
+        </th:block>
+      </ul>
+    </nav>
+  </aside>
+</th:block>
+
+<!-- 递归渲染文档树节点 -->
+<th:block th:fragment="doc-tree-node(node)">
+  <th:block th:if="${node.spec.type == 'DOC'}">
+    <a class="doc-tree-link"
+       th:href="@{${node.status.permalink}}"
+       th:title="${node.spec.title}"
+       th:classappend="${node.metadata.name == docTree.metadata.name ? 'active' : ''}"
+       th:text="${node.spec.title}">文档</a>
+  </th:block>
+
+  <th:block th:if="${node.spec.type == 'TREE'}">
+    <details class="doc-tree-details" th:attr="open=${#arrays.contains(crumbs, node)}">
+      <summary class="doc-tree-summary">
+        <a class="doc-tree-link"
+           th:href="@{${node.status.permalink}}"
+           th:text="${node.spec.title}"
+           th:classappend="${node.metadata.name == docTree.metadata.name ? 'active' : ''}"
+           th:title="${node.spec.title}">目录</a>
+      </summary>
+      <ul class="doc-tree-sublist" th:if="${node.children != null and not #lists.isEmpty(node.children)}">
+        <li class="doc-tree-item" th:each="childNode : ${node.children}"
+            th:replace="~{this :: doc-tree-node(${childNode})}"></li>
+      </ul>
+    </details>
+  </th:block>
+</th:block>

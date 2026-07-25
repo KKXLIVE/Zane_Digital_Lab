@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{layout :: html(head = null,content = ~{::content})}">
+<th:block th:fragment="content">
+  <div class="lh">
+    <span class="lh-badge" data-i18n-key="tags_badge">标签</span>
+    <h1 class="lh-title" th:text="${tag.spec.displayName}">标签</h1>
+    <p class="lh-count"
+       data-i18n-key="articles_total"
+       th:attr="data-i18n-param-n=${posts.total}">共 0 篇文章</p>
+  </div>
+  <div class="entries">
+    <article class="entry" th:each="post : ${posts.items}">
+      <a th:href="@{${post.status.permalink}}" class="entry-cover" th:if="${post.spec.cover}">
+        <img th:src="@{${post.spec.cover}}" th:alt="${post.spec.title}" loading="lazy" />
+      </a>
+      <div class="entry-cover pc" th:unless="${post.spec.cover}">
+        <span th:text="${#strings.substring(post.spec.title, 0, 1)}">A</span>
+      </div>
+      <div class="entry-body">
+        <a th:href="@{${post.status.permalink}}">
+          <div class="entry-date" th:text="${#temporals.format(post.spec.publishTime, 'yyyy.MM.dd')}">2024.01.01</div>
+          <h2 class="entry-title" th:text="${post.spec.title}">标题</h2>
+          <p class="entry-excerpt" th:text="${post.status.excerpt}">摘要</p>
+        </a>
+    </article>
+  </div>
+  <nav class="pager" th:if="${posts.totalPages > 1}">
+    <a class="pager-btn" th:if="${posts.hasPrevious()}" th:href="@{${posts.prevUrl}}"
+       data-i18n-key="prev_page">← 上一页</a>
+    <span class="pager-info"
+          data-i18n-key="page_info"
+          th:attr="data-i18n-param-page=${posts.page},data-i18n-param-total=${posts.totalPages}">第 0 页</span>
+    <a class="pager-btn" th:if="${posts.hasNext()}" th:href="@{${posts.nextUrl}}"
+       data-i18n-key="next_page">下一页 →</a>
+  </nav>
+</th:block>
+</html>

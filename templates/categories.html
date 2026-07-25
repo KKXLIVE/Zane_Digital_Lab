@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{layout :: html(head = null,content = ~{::content})}">
+<th:block th:fragment="content">
+  <div class="lh">
+    <span class="lh-badge" data-i18n-key="cat_badge">分类</span>
+    <h1 class="lh-title" data-i18n-key="cat_title">全部分类</h1>
+    <p class="lh-count"
+       data-i18n-key="cat_count"
+       th:attr="data-i18n-param-n=${#lists.size(categories)}"
+       th:text="'共 ' + ${#lists.size(categories)} + ' 个分类'"></p>
+  </div>
+  <div class="cats-w">
+    <a class="cat-it" th:each="cat : ${categories}" th:href="@{${cat.status.permalink}}">
+      <span class="cat-name" th:text="${cat.spec.displayName}">分类</span>
+      <span class="cat-count" th:text="${cat.status.postCount}">0</span>
+    </a>
+  </div>
+</th:block>
+</html>

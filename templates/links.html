@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{layout :: html(head = null,content = ~{::content})}">
+<th:block th:fragment="content">
+
+  <!-- ===== 页面头部 ===== -->
+  <div class="links-h">
+    <div class="links-h-inner">
+      <a th:href="@{/}" class="links-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <span data-i18n-key="back_home">返回首页</span>
+      </a>
+      <h1 class="links-title">友情链接</h1>
+    </div>
+  </div>
+
+  <!-- ===== 友链分组列表 ===== -->
+  <div class="links-body">
+    <th:block th:if="${groups != null and not #lists.isEmpty(groups)}">
+      <th:block th:each="group : ${groups}">
+        <section class="feed-group" th:if="${not #lists.isEmpty(group.links)}">
+          <div class="feed-group-h">
+            <h2 class="feed-group-title" th:text="${group.spec.displayName}">友链组</h2>
+            <span class="feed-group-count" data-i18n-key="links_total" th:attr="data-i18n-param-n=${#lists.size(group.links)}">0</span>
+          </div>
+          <p class="feed-group-desc" th:if="${group.metadata.annotations?.get('description')}" th:text="${group.metadata.annotations.get('description')}"></p>
+
+          <menu class="feed-list">
+            <li th:each="link : ${group.links}">
+              <div class="feed-card-wrapper" th:data-link="${link.spec.url}">
+                <a th:href="@{${link.spec.url}}" class="feed-card gradient-card" target="_blank" rel="noopener noreferrer">
+                  <div class="avatar">
+                    <img th:src="${link.spec.logo}" th:alt="${link.spec.displayName}"
+                         loading="lazy"
+                         onerror="this.style.display='none';this.parentElement.classList.add('no-logo')" />
+                    <span class="avatar-fallback" th:text="${#strings.substring(link.spec.displayName, 0, 1)}">A</span>
+                  </div>
+                  <span class="author" th:text="${link.spec.displayName}">名称</span>
+                </a>
+
+                <div class="feed-tooltip">
+                  <div class="site-content">
+                    <img class="site-icon" th:src="${link.spec.logo}" th:alt="${link.spec.displayName}"
+                         onerror="this.style.display='none'" />
+                    <div class="site-info">
+                      <h4 class="site-name" th:text="${link.spec.displayName}">名称</h4>
+                      <code class="domain"
+                            th:text="${#strings.replace(#strings.replace(link.spec.url, 'https://', ''), 'http://', '')}">domain.com</code>
+                    </div>
+                  </div>
+                  <div class="desc-content" th:if="${link.spec.description}">
+                    <p th:text="${link.spec.description}">描述</p>
+                  </div>
+                </div>
+              </div>
+            </li>
+          </menu>
+        </section>
+      </th:block>
+    </th:block>
+
+    <!-- 空状态 -->
+    <div class="links-empty" th:if="${groups == null or #lists.isEmpty(groups)}">
+      <div class="links-empty-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+        </svg>
+      </div>
+      <p class="links-empty-text" data-i18n-key="links_empty">暂无聊友链接</p>
+      <p class="links-empty-hint" data-i18n-key="links_hint">请在 Halo 后台安装并配置「Links」插件添加友链</p>
+    </div>
+  </div>
+
+  <!-- ===== Tabs: 我的博客信息 + 申请友链 ===== -->
+  <div class="custom-tabs-container" id="linkTabs">
+    <div class="custom-tabs-header">
+      <div class="custom-tabs-nav">
+        <button class="custom-tab-item active" data-tab="tab-info" onclick="switchLinksTab(this)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <span data-i18n-key="links_my_info">我的博客信息</span>
+        </button>
+        <button class="custom-tab-item" data-tab="tab-apply" onclick="switchLinksTab(this)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span data-i18n-key="links_apply">申请友链</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="custom-tabs-content">
+      <!-- 我的博客信息 -->
+      <div id="tab-info" class="custom-tab-pane active"
+           th:with="myTitle=${#strings.isEmpty(theme.config?.links?.my_title) ? site.title : theme.config?.links?.my_title},
+                    myUrl=${#strings.isEmpty(theme.config?.links?.my_url) ? site.url : theme.config?.links?.my_url},
+                    myLogo=${#strings.isEmpty(theme.config?.links?.my_logo) ? (site.logo ?: '') : theme.config?.links?.my_logo},
+                    myDesc=${#strings.isEmpty(theme.config?.links?.my_desc) ? (site.subtitle ?: '') : theme.config?.links?.my_desc},
+                    myRss=${#strings.isEmpty(theme.config?.links?.my_rss) ? '/rss.xml' : theme.config?.links?.my_rss}">
+        <div class="link-tab">
+          <div class="my-feed-card gradient-card">
+            <div class="avatar">
+              <img th:src="${myLogo}" th:alt="${myTitle}"
+                   onerror="this.style.display='none';this.parentElement.classList.add('no-logo')" />
+              <span class="avatar-fallback" th:text="${#strings.substring(myTitle, 0, 1)}">A</span>
+            </div>
+            <div class="info">
+              <span class="author" th:text="${myTitle}">站点名称</span>
+              <span class="desc" th:text="${myDesc}">站点描述</span>
+            </div>
+          </div>
+
+          <div class="copy-fields">
+            <div class="copy-item">
+              <span class="prompt" data-i18n-key="links_field_name">站点名称</span>
+              <div class="code" th:text="${myTitle}">站点名称</div>
+              <button class="copy-btn" aria-label="复制" th:attr="data-copy=${myTitle}" onclick="copyLinksText(this)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              </button>
+            </div>
+            <div class="copy-item">
+              <span class="prompt" data-i18n-key="links_field_url">网址</span>
+              <div class="code" th:text="${myUrl}">URL</div>
+              <button class="copy-btn" aria-label="复制" th:attr="data-copy=${myUrl}" onclick="copyLinksText(this)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              </button>
+            </div>
+            <div class="copy-item">
+              <span class="prompt" data-i18n-key="links_field_logo">Logo</span>
+              <div class="code" th:text="${myLogo}">LOGO</div>
+              <button class="copy-btn" aria-label="复制" th:attr="data-copy=${myLogo}" onclick="copyLinksText(this)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              </button>
+            </div>
+            <div class="copy-item">
+              <span class="prompt" data-i18n-key="links_field_desc">描述</span>
+              <div class="code" th:text="${myDesc}">描述</div>
+              <button class="copy-btn" aria-label="复制" th:attr="data-copy=${myDesc}" onclick="copyLinksText(this)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              </button>
+            </div>
+            <div class="copy-item">
+              <span class="prompt">RSS</span>
+              <div class="code" th:text="${myRss}">/rss.xml</div>
+              <button class="copy-btn" aria-label="复制" th:attr="data-copy=${myRss}" onclick="copyLinksText(this)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 申请友链 -->
+      <div id="tab-apply" class="custom-tab-pane">
+        <div class="link-tab">
+          <div class="apply-content">
+            <div th:if="${theme.config?.links?.apply_content}" th:utext="${theme.config?.links?.apply_content}"></div>
+            <div th:unless="${theme.config?.links?.apply_content}">
+              <p data-i18n-key="links_apply_hint">欢迎与我交换友链！请在评论区留下你的博客信息：</p>
+              <ul>
+                <li><strong data-i18n-key="links_field_name">站点名称</strong>：你的博客标题</li>
+                <li><strong data-i18n-key="links_field_url">网址</strong>：你的博客 URL</li>
+                <li><strong data-i18n-key="links_field_desc">描述</strong>：一句话介绍</li>
+                <li><strong>Logo</strong>：Logo 或头像链接</li>
+              </ul>
+              <p data-i18n-key="links_apply_note">我会尽快审核并添加你的友链。</p>
+            </div>
+          </div>
+
+          <!-- 自助提交 / 修改按钮 -->
+          <th:block th:if="${theme.config?.links?.enable_submit}">
+            <div class="link-submit-actions">
+              <div id="link-submit-entry" class="link-submit-entry">
+                <button type="button" class="ls-btn primary" onclick="openLinkSubmitModal()">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  <span data-i18n-key="links_submit_online">在线提交</span>
+                </button>
+              </div>
+              <div th:if="${theme.config?.links?.enable_update}" id="link-update-entry" class="link-submit-entry">
+                <button type="button" class="ls-btn" onclick="openLinkUpdateModal()">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  <span data-i18n-key="links_update_online">修改友链</span>
+                </button>
+              </div>
+            </div>
+          </th:block>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 提交/修改模态框 ===== -->
+  <th:block th:replace="~{modules/links/submit-modal :: submit-modal}"></th:block>
+  <th:block th:replace="~{modules/links/update-modal :: update-modal}"></th:block>
+
+  <!-- ===== 评论区 ===== -->
+  <div class="links-comment">
+    <h3 class="links-comment-title" data-i18n-key="links_comment">评论区</h3>
+    <th:block th:if="${haloCommentEnabled}"
+              th:replace="~{modules/common/comment :: comment(title='评论区', haloComment=${ {group: 'plugin.halo.run', kind: 'Plugin', name: 'Links'} })}">
+    </th:block>
+  </div>
+
+  <!-- ===== 随机穿梭按钮 ===== -->
+  <button class="links-random-btn" id="linksRandomBtn" onclick="visitRandomLink()" title="随机穿梭">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+  </button>
+
+  <!-- ===== JS: 提交/修改功能 ===== -->
+  <script th:inline="javascript">
+    /*<![CDATA[*/
+    window.linkSubmitConfig = {
+      enableSubmit: /*[[${theme.config?.links?.enable_submit}]]*/ false,
+      enableUpdate: /*[[${theme.config?.links?.enable_update}]]*/ false,
+      verifyType: /*[[${theme.config?.links?.verify_type ?: 'email'}]]*/ "email",
+    };
+    /*]]>*/
+  </script>
+  <script>
+    (function() {
+      'use strict';
+
+      // ===== Tab 切换 =====
+      function switchLinksTab(btn) {
+        var targetId = btn.getAttribute('data-tab');
+        var container = btn.closest('.custom-tabs-container');
+        if (!container) return;
+        container.querySelectorAll('.custom-tab-item').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        container.querySelectorAll('.custom-tab-pane').forEach(function(pane) {
+          pane.classList.toggle('active', pane.id === targetId);
+        });
+      }
+
+      // ===== 复制文本 =====
+      function copyLinksText(btn) {
+        var text = btn.getAttribute('data-copy');
+        if (!text) return;
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(text).then(function() {
+            var icon = btn.querySelector('svg');
+            if (icon) {
+              var original = btn.innerHTML;
+              btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+              btn.classList.add('copied');
+              setTimeout(function() {
+                btn.innerHTML = original;
+                btn.classList.remove('copied');
+              }, 1500);
+            }
+          }).catch(function(err) { console.error('复制失败:', err); });
+        } else {
+          var ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          try { document.execCommand('copy'); } catch(e) {}
+          document.body.removeChild(ta);
+        }
+      }
+
+      // ===== 随机穿梭 =====
+      function visitRandomLink() {
+        var cards = document.querySelectorAll('.feed-card-wrapper[data-link]');
+        if (cards.length === 0) {
+          if (typeof window.__ === 'function') {
+            alert(window.__('links_empty'));
+          } else {
+            alert('暂无友链可访问');
+          }
+          return;
+        }
+        var randomCard = cards[Math.floor(Math.random() * cards.length)];
+        var url = randomCard.getAttribute('data-link');
+        if (url && url !== '#') {
+          window.open(url, '_blank');
+        }
+      }
+
+      // ===== 基于 URL hash 生成延迟动画 =====
+      document.querySelectorAll('.feed-card-wrapper').forEach(function(wrapper) {
+        var link = wrapper.getAttribute('data-link') || '';
+        var hash = 0;
+        for (var i = 0; i < link.length; i++) {
+          hash = hash * 31 + link.charCodeAt(i);
+        }
+        wrapper.style.setProperty('--delay', (Math.abs(hash) % 1000) / 1000 + 's');
+      });
+
+      // ===== Tooltip 定位（防止溢出视口） =====
+      document.querySelectorAll('.feed-card-wrapper').forEach(function(wrapper) {
+        wrapper.addEventListener('mouseenter', function() {
+          var tooltip = this.querySelector('.feed-tooltip');
+          if (!tooltip) return;
+          tooltip.style.visibility = 'visible';
+          tooltip.style.opacity = '0';
+          var rect = tooltip.getBoundingClientRect();
+          var windowHeight = window.innerHeight;
+          if (rect.top < 10) {
+            tooltip.classList.add('tooltip-bottom');
+          } else {
+            tooltip.classList.remove('tooltip-bottom');
+          }
+          tooltip.style.visibility = '';
+          tooltip.style.opacity = '';
+        });
+        wrapper.addEventListener('mouseleave', function() {
+          var tooltip = this.querySelector('.feed-tooltip');
+          if (tooltip) tooltip.classList.remove('tooltip-bottom');
+        });
+      });
+
+      // ===== 提交模态框 =====
+      function openLinkSubmitModal() {
+        var modal = document.getElementById('link-submit-modal');
+        if (modal) { modal.classList.add('open'); document.body.style.overflow = 'hidden'; }
+        // 加载友链分组
+        if (typeof loadLinkGroups === 'function') loadLinkGroups('link-group', 'link-group-wrapper');
+      }
+      function closeLinkSubmitModal() {
+        var modal = document.getElementById('link-submit-modal');
+        if (modal) { modal.classList.remove('open'); document.body.style.overflow = ''; }
+      }
+
+      // ===== 修改模态框 =====
+      function openLinkUpdateModal() {
+        var modal = document.getElementById('link-update-modal');
+        if (modal) { modal.classList.add('open'); document.body.style.overflow = 'hidden'; }
+        // 加载友链分组
+        if (typeof loadLinkGroups === 'function') loadLinkGroups('update-link-group', 'update-link-group-wrapper');
+      }
+      function closeLinkUpdateModal() {
+        var modal = document.getElementById('link-update-modal');
+        if (modal) { modal.classList.remove('open'); document.body.style.overflow = ''; }
+      }
+
+      // ===== 更多选项折叠 =====
+      function toggleMoreOptions(btn) {
+        var content = btn.nextElementSibling;
+        if (content) {
+          content.classList.toggle('open');
+          btn.classList.toggle('collapsed');
+        }
+      }
+
+      // ===== Toast 工具函数（降级） =====
+      if (typeof window.showToast !== 'function') {
+        window.showToast = function(type, msg) { alert('[' + type + '] ' + msg); };
+      }
+
+      // ===== 使用 LinksSubmit API 的包装函数 =====
+      // 插件全局函数（sendVerifyCode/getLinkDetail 等）依赖固定 DOM ID
+      // （'email','url','displayName' 等），与我们表单的 'link-*' 前缀 ID 不匹配，
+      // 因此在此处主动覆盖，使用 LinksSubmit 对象直接调用 REST API。
+
+      // ----- 自动填充（提交） -----
+      window.autoFetchSiteInfo = function() {
+        if (typeof LinksSubmit === 'undefined') { showToast('error', '插件未加载'); return; }
+        var inp = document.getElementById('link-url');
+        if (!inp || !inp.value) { showToast('warning', '请先输入网站地址'); return; }
+        var btn = document.getElementById('auto-fetch-btn');
+        if (btn) btn.disabled = true;
+        LinksSubmit.getLinkDetail(inp.value.trim()).then(function(r) {
+          if (btn) btn.disabled = false;
+          if (r.code === 200 && r.data) {
+            var d = r.data;
+            var el;
+            el = document.getElementById('link-name'); if (el && d.displayName) el.value = d.displayName;
+            el = document.getElementById('link-logo'); if (el && d.logo) el.value = d.logo;
+            el = document.getElementById('link-desc'); if (el && d.description) el.value = d.description;
+            showToast('success', '已自动填充网站信息');
+          } else {
+            showToast('error', r.message || '获取网站信息失败');
+          }
+        }).catch(function() {
+          if (btn) btn.disabled = false;
+          showToast('error', '网络请求失败，请手动填写');
+        });
+      };
+
+      // ----- 发送验证码（提交） -----
+      window.sendVerifyCode = function(btn) {
+        if (typeof LinksSubmit === 'undefined') { showToast('error', '插件未加载'); return; }
+        var el = document.getElementById('link-email');
+        if (!el || !el.value) { showToast('warning', '请先填写联系邮箱'); return; }
+        var email = el.value.trim();
+        var origText = btn.textContent || btn.innerText;
+        btn.disabled = true;
+        btn.textContent = '发送中...';
+        LinksSubmit.sendVerifyCode(email).then(function(r) {
+          if (r.code === 200) {
+            showToast('success', '验证码已发送');
+            var count = 60;
+            btn.textContent = count + 's';
+            var iv = setInterval(function() {
+              count--;
+              if (count <= 0) {
+                clearInterval(iv);
+                btn.disabled = false;
+                btn.textContent = origText;
+              } else {
+                btn.textContent = count + 's';
+              }
+            }, 1000);
+          } else {
+            btn.disabled = false;
+            btn.textContent = origText;
+            showToast('error', r.message || '发送验证码失败');
+          }
+        }).catch(function() {
+          btn.disabled = false;
+          btn.textContent = origText;
+          showToast('error', '网络请求失败');
+        });
+      };
+
+      // ----- 提交友链 -----
+      window.handleLinkSubmit = function() {
+        if (typeof LinksSubmit === 'undefined') { showToast('error', '插件未加载'); return; }
+        var gId = function(id) { return document.getElementById(id); };
+        var linkPageUrl = (gId('link-page') || {}).value || '';
+        // 插件要求 linkPageUrl 不能为空且域名需与 url 匹配
+        if (!linkPageUrl) {
+          var rawUrl = (gId('link-url') || {}).value || '';
+          try { linkPageUrl = new URL(rawUrl).origin + '/links'; } catch(e) { linkPageUrl = ''; }
+        }
+        var data = {
+          url: (gId('link-url') || {}).value || '',
+          displayName: (gId('link-name') || {}).value || '',
+          logo: (gId('link-logo') || {}).value || '',
+          description: (gId('link-desc') || {}).value || '',
+          linkPageUrl: linkPageUrl,
+          rssUrl: (gId('link-rss') || {}).value || '',
+          groupName: (gId('link-group') || {}).value || '',
+          email: (gId('link-email') || {}).value || ''
+        };
+        if (!data.url || !data.displayName || !data.email) { showToast('warning', '请填写所有必填项'); return; }
+        var vc = (gId('link-code') || {}).value || '';
+        var vt = (window.linkSubmitConfig || {}).verifyType || 'email';
+        var btn = gId('submit-btn');
+        if (btn) btn.disabled = true;
+        LinksSubmit.submit(data, vc, vt).then(function(r) {
+          if (btn) btn.disabled = false;
+          if (r.code === 200) {
+            showToast('success', '提交成功！请等待审核');
+            closeLinkSubmitModal();
+          } else {
+            showToast('error', r.message || '提交失败');
+          }
+        }).catch(function() {
+          if (btn) btn.disabled = false;
+          showToast('error', '网络请求失败');
+        });
+      };
+
+      // ----- 自动填充（修改） -----
+      window.autoFetchUpdateSiteInfo = function() {
+        if (typeof LinksSubmit === 'undefined') { showToast('error', '插件未加载'); return; }
+        var inp = document.getElementById('update-link-url');
+        if (!inp || !inp.value) { showToast('warning', '请先输入新网站地址'); return; }
+        var btn = document.getElementById('update-auto-fetch-btn');
+        if (btn) btn.disabled = true;
+        LinksSubmit.getLinkDetail(inp.value.trim()).then(function(r) {
+          if (btn) btn.disabled = false;
+          if (r.code === 200 && r.data) {
+            var d = r.data;
+            var el;
+            el = document.getElementById('update-link-name'); if (el && d.displayName) el.value = d.displayName;
+            el = document.getElementById('update-link-logo'); if (el && d.logo) el.value = d.logo;
+            el = document.getElementById('update-link-desc'); if (el && d.description) el.value = d.description;
+            showToast('success', '已自动填充网站信息');
+          } else {
+            showToast('error', r.message || '获取网站信息失败');
+          }
+        }).catch(function() {
+          if (btn) btn.disabled = false;
+          showToast('error', '网络请求失败，请手动填写');
+        });
+      };
+
+      // ----- 发送验证码（修改） -----
+      window.sendUpdateVerifyCode = function(btn) {
+        if (typeof LinksSubmit === 'undefined') { showToast('error', '插件未加载'); return; }
+        var el = document.getElementById('update-link-email');
+        if (!el || !el.value) { showToast('warning', '请先填写联系邮箱'); return; }
+        var email = el.value.trim();
+        var origText = btn.textContent || btn.innerText;
+        btn.disabled = true;
+        btn.textContent = '发送中...';
+        LinksSubmit.sendVerifyCode(email).then(function(r) {
+          if (r.code === 200) {
+            showToast('success', '验证码已发送');
+            var count = 60;
+            btn.textContent = count + 's';
+            var iv = setInterval(function() {
+              count--;
+              if (count <= 0) {
+                clearInterval(iv);
+                btn.disabled = false;
+                btn.textContent = origText;
+              } else {
+                btn.textContent = count + 's';
+              }
+            }, 1000);
+          } else {
+            btn.disabled = false;
+            btn.textContent = origText;
+            showToast('error', r.message || '发送验证码失败');
+          }
+        }).catch(function() {
+          btn.disabled = false;
+          btn.textContent = origText;
+          showToast('error', '网络请求失败');
+        });
+      };
+
+      // ----- 确认修改友链 -----
+      window.handleLinkUpdate = function() {
+        if (typeof LinksSubmit === 'undefined') { showToast('error', '插件未加载'); return; }
+        var gId = function(id) { return document.getElementById(id); };
+        var updateLinkPageUrl = (gId('update-link-page') || {}).value || '';
+        if (!updateLinkPageUrl) {
+          var rawUrl = (gId('update-link-url') || {}).value || '';
+          try { updateLinkPageUrl = new URL(rawUrl).origin + '/links'; } catch(e) { updateLinkPageUrl = ''; }
+        }
+        var data = {
+          oldUrl: (gId('update-link-old-url') || {}).value || '',
+          url: (gId('update-link-url') || {}).value || '',
+          displayName: (gId('update-link-name') || {}).value || '',
+          logo: (gId('update-link-logo') || {}).value || '',
+          description: (gId('update-link-desc') || {}).value || '',
+          linkPageUrl: updateLinkPageUrl,
+          rssUrl: (gId('update-link-rss') || {}).value || '',
+          groupName: (gId('update-link-group') || {}).value || '',
+          email: (gId('update-link-email') || {}).value || ''
+        };
+        if (!data.oldUrl || !data.url || !data.displayName || !data.email) { showToast('warning', '请填写所有必填项'); return; }
+        var vc = (gId('update-link-code') || {}).value || '';
+        var vt = (window.linkSubmitConfig || {}).verifyType || 'email';
+        var btn = gId('update-submit-btn');
+        if (btn) btn.disabled = true;
+        LinksSubmit.update(data, vc, vt).then(function(r) {
+          if (btn) btn.disabled = false;
+          if (r.code === 200) {
+            showToast('success', '修改成功！请等待审核');
+            closeLinkUpdateModal();
+          } else {
+            showToast('error', r.message || '修改失败');
+          }
+        }).catch(function() {
+          if (btn) btn.disabled = false;
+          showToast('error', '网络请求失败');
+        });
+      };
+
+      // ----- 图形验证码刷新 -----
+      window.refreshCaptcha = function(prefix) {
+        if (typeof LinksSubmit === 'undefined' || !LinksSubmit.refreshCaptcha) return;
+        var suffix = prefix ? prefix + '-' : '';
+        var img = document.getElementById(suffix + 'captcha-img');
+        if (img) LinksSubmit.refreshCaptcha(img);
+      };
+
+      // ----- 加载友链分组 -----
+      window.loadLinkGroups = function(selectId, wrapperId) {
+        if (typeof LinksSubmit === 'undefined') return;
+        LinksSubmit.getLinkGroups().then(function(r) {
+          if (r.code === 200 && r.data && r.data.length > 0) {
+            var sel = document.getElementById(selectId);
+            var wrp = document.getElementById(wrapperId);
+            if (!sel || !wrp) return;
+            while (sel.options.length > 1) sel.remove(1);
+            r.data.forEach(function(g) {
+              var o = document.createElement('option');
+              o.value = g;
+              o.textContent = g;
+              sel.appendChild(o);
+            });
+            wrp.style.display = '';
+          }
+        }).catch(function() {});
+      };
+
+      // ===== ESC 键关闭 =====
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          if (document.getElementById('link-submit-modal') && document.getElementById('link-submit-modal').classList.contains('open')) closeLinkSubmitModal();
+          if (document.getElementById('link-update-modal') && document.getElementById('link-update-modal').classList.contains('open')) closeLinkUpdateModal();
+        }
+      });
+
+      window.switchLinksTab = switchLinksTab;
+      window.copyLinksText = copyLinksText;
+      window.visitRandomLink = visitRandomLink;
+      window.openLinkSubmitModal = openLinkSubmitModal;
+      window.closeLinkSubmitModal = closeLinkSubmitModal;
+      window.openLinkUpdateModal = openLinkUpdateModal;
+      window.closeLinkUpdateModal = closeLinkUpdateModal;
+      window.toggleMoreOptions = toggleMoreOptions;
+    })();
+  </script>
+
+</th:block>
+</html>

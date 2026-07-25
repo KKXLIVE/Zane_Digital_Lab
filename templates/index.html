@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{layout :: html(head = null,content = ~{::content})}">
+<th:block th:fragment="content">
+
+  <th:block th:with="hero=${theme.config?.hero}">
+
+  <!-- ====== HERO 主区域（非 video-reveal 模式） ====== -->
+  <section class="hero"
+           th:if="${hero?.hero_bg_mode != 'video-reveal'}"
+           th:classappend="${hero?.hero_bg_mode == 'image-reveal'} ? 'hero-reveal-sticky has-bg' : (${hero?.hero_bg_mode != null and hero?.hero_bg_mode != 'none'} ? 'has-bg' : '')"
+           th:attr="data-bg-mode=${hero?.hero_bg_mode},
+                    data-overlay=${hero?.hero_overlay},
+                    data-reveal-size=${hero?.hero_reveal_size}">
+
+    <!-- 背景视频 -->
+    <video class="hero-video"
+           th:if="${hero?.hero_bg_mode == 'video'}"
+           autoplay muted loop playsinline preload="auto"
+           th:attr="src=${hero?.hero_video} ?: ${hero?.hero_video_url}">
+    </video>
+
+    <!-- 背景图片（单图模式） -->
+    <div class="hero-bg-img"
+         th:if="${hero?.hero_bg_mode == 'image'}"
+         th:style="'background-image: url(' + (${hero?.hero_image} ?: ${hero?.hero_image_url}) + ')'">
+    </div>
+
+    <!-- 双图擦除模式 -->
+    <th:block th:if="${hero?.hero_bg_mode == 'image-reveal'}">
+      <div class="hero-reveal-bg"
+           th:style="'background-image: url(' + (${hero?.hero_image_bottom} ?: ${hero?.hero_image_bottom_url}) + ')'">
+      </div>
+      <div class="hero-reveal-top" id="heroRevealTop"
+           th:style="'background-image: url(' + (${hero?.hero_image_top} ?: ${hero?.hero_image_top_url}) + ')'">
+      </div>
+    </th:block>
+
+    <!-- 遮罩 -->
+    <div class="hero-overlay"
+         th:if="${hero?.hero_bg_mode != null and hero?.hero_bg_mode != 'none'}"
+         th:style="'opacity: ' + (${hero?.hero_overlay} ?: 0.3)">
+    </div>
+
+    <!-- 标题 -->
+    <div class="hero-hl">
+      <p class="hero-badge" th:if="${posts.totalPages > 0}">
+        <span class="hero-badge-dot"></span>
+        <span data-i18n-key="articles_total"
+              th:attr="data-i18n-param-n=${posts.total}">
+          共 <th:block th:text="${posts.total}">0</th:block> 篇文章
+        </span>
+      </p>
+      <h1 class="hero-title" th:text="${hero?.hero_title} ?: 'Aurora'">Aurora</h1>
+      <p class="hero-desc" th:text="${hero?.hero_subtitle} ?: '用文字记录思考，用代码构建世界'">用文字记录思考，用代码构建世界</p>
+    </div>
+  </section>
+
+  <!-- ====== video-reveal 模式：丝滑过渡 + 文章浮在双图背景上 ====== -->
+  <div class="hero-vr-wrap" th:if="${hero?.hero_bg_mode == 'video-reveal'}"
+       th:attr="data-overlay=${hero?.hero_overlay}">
+    <!-- 固定标题（始终在视口中央，不随滚动移动） -->
+    <div class="hero-hl">
+      <p class="hero-badge" th:if="${posts.totalPages > 0}">
+        <span class="hero-badge-dot"></span>
+        <span data-i18n-key="articles_total"
+              th:attr="data-i18n-param-n=${posts.total}">
+          共 <th:block th:text="${posts.total}">0</th:block> 篇文章
+        </span>
+      </p>
+      <h1 class="hero-title" th:text="${hero?.hero_title} ?: 'Aurora'">Aurora</h1>
+      <p class="hero-desc" th:text="${hero?.hero_subtitle} ?: '用文字记录思考，用代码构建世界'">用文字记录思考，用代码构建世界</p>
+    </div>
+    <!-- 视频层（sticky 保持在顶部） -->
+    <section class="hero has-bg hero-vr-video"
+             th:attr="data-overlay=${hero?.hero_overlay}">
+      <video class="hero-video" autoplay muted loop playsinline preload="auto"
+             th:attr="src=${hero?.hero_video} ?: ${hero?.hero_video_url}">
+      </video>
+      <div class="hero-overlay" th:style="'opacity: ' + (${hero?.hero_overlay} ?: 0.3)"></div>
+    </section>
+    <!-- 双图擦除固定背景 -->
+    <section class="hero-reveal-section hero-reveal-fixed"
+             th:attr="data-reveal-size=${hero?.hero_reveal_size}">
+      <div class="hero-reveal-bg"
+           th:style="'background-image: url(' + (${hero?.hero_image_bottom} ?: ${hero?.hero_image_bottom_url}) + ')'">
+      </div>
+      <div class="hero-reveal-top" id="heroRevealTop"
+           th:style="'background-image: url(' + (${hero?.hero_image_top} ?: ${hero?.hero_image_top_url}) + ')'">
+      </div>
+      <div class="hero-overlay" th:style="'opacity: ' + (${hero?.hero_overlay} ?: 0.3)"></div>
+    </section>
+    <!-- 文章列表（浮在双图背景之上） -->
+    <div class="entries" id="entryList">
+      <article class="entry" th:each="post : ${posts.items}">
+        <a th:href="@{${post.status.permalink}}" class="entry-cover" th:if="${post.spec.cover}">
+          <img th:src="@{${post.spec.cover}}" th:alt="${post.spec.title}" loading="lazy" />
+        </a>
+        <div class="entry-cover pc" th:unless="${post.spec.cover}">
+          <span th:text="${#strings.substring(post.spec.title, 0, 1)}">A</span>
+        </div>
+        <div class="entry-body">
+          <a th:href="@{${post.status.permalink}}">
+            <div class="entry-date"
+                 th:attr="data-i18n-date=${post.spec.publishTime}">2024.01.01</div>
+            <h2 class="entry-title" th:text="${post.spec.title}">标题</h2>
+            <p class="entry-excerpt" th:text="${post.status.excerpt}">摘要</p>
+          </a>
+          <div class="entry-meta">
+          </div>
+        </div>
+      </article>
+    </div>
+    <!-- 分页（浮在双图背景之上） -->
+    <nav class="pager" th:if="${posts.totalPages > 1}">
+      <a class="pager-btn" th:if="${posts.hasPrevious()}" th:href="@{${posts.prevUrl}}"
+         data-i18n-key="prev_page">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        上一页
+      </a>
+      <span class="pager-info"
+            data-i18n-key="page_info"
+            th:attr="data-i18n-param-page=${posts.page},data-i18n-param-total=${posts.totalPages}">
+      </span>
+      <a class="pager-btn" th:if="${posts.hasNext()}" th:href="@{${posts.nextUrl}}"
+         data-i18n-key="next_page">
+        下一页
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </nav>
+  </div>
+
+  <!-- 非 video-reveal 模式：文章列表 + 分页（在 th:with 作用域内） -->
+  <div class="entries" id="entryList" th:if="${hero?.hero_bg_mode != 'video-reveal'}"
+       th:classappend="${hero?.hero_bg_mode == 'image-reveal'} ? 'entries-over-reveal' : ''">
+    <article class="entry" th:each="post : ${posts.items}">
+      <a th:href="@{${post.status.permalink}}" class="entry-cover" th:if="${post.spec.cover}">
+        <img th:src="@{${post.spec.cover}}" th:alt="${post.spec.title}" loading="lazy" />
+      </a>
+      <div class="entry-cover pc" th:unless="${post.spec.cover}">
+        <span th:text="${#strings.substring(post.spec.title, 0, 1)}">A</span>
+      </div>
+      <div class="entry-body">
+        <a th:href="@{${post.status.permalink}}">
+          <div class="entry-date"
+               th:attr="data-i18n-date=${post.spec.publishTime}">2024.01.01</div>
+          <h2 class="entry-title" th:text="${post.spec.title}">标题</h2>
+          <p class="entry-excerpt" th:text="${post.status.excerpt}">摘要</p>
+        </a>
+        <div class="entry-meta">
+        </div>
+      </div>
+    </article>
+  </div>
+  <nav class="pager" th:if="${posts.totalPages > 1 and hero?.hero_bg_mode != 'video-reveal'}">
+    <a class="pager-btn" th:if="${posts.hasPrevious()}" th:href="@{${posts.prevUrl}}"
+       data-i18n-key="prev_page">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      上一页
+    </a>
+    <span class="pager-info"
+          data-i18n-key="page_info"
+          th:attr="data-i18n-param-page=${posts.page},data-i18n-param-total=${posts.totalPages}">
+    </span>
+    <a class="pager-btn" th:if="${posts.hasNext()}" th:href="@{${posts.nextUrl}}"
+       data-i18n-key="next_page">
+      下一页
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+  </nav>
+
+</th:block>
+</html>

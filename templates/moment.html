@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{layout :: html(head = null, content = ~{::content})}">
+<th:block th:fragment="content"
+          th:with="momentsConfig=${theme.config.moments}, content=${moment.spec.content}">
+
+  <!--/* ========== 卡片模式详情页（默认） ========== */-->
+  <th:block th:if="${momentsConfig == null or momentsConfig.template == null or momentsConfig.template == 'card'}">
+    <div class="moment-back">
+      <a href="/moments" class="back-link">← 返回瞬间</a>
+    </div>
+
+    <article class="moment-detail" style="--delay: 0.1s">
+      <header class="moment-header">
+        <div th:if="${moment.owner != null}" class="author-info">
+          <img th:if="${moment.owner.avatar != null}"
+               th:src="${moment.owner.avatar}"
+               th:alt="${moment.owner.displayName}"
+               class="author-avatar"
+               loading="lazy" />
+          <span class="author-name" th:text="${moment.owner.displayName}">作者</span>
+        </div>
+        <time class="moment-time" th:datetime="${moment.spec.releaseTime}">
+          <span th:text="${#temporals.format(moment.spec.releaseTime, 'yyyy-MM-dd HH:mm')}">时间</span>
+        </time>
+      </header>
+
+      <div class="moment-body">
+        <div th:if="${not #strings.isEmpty(content.html)}" class="moment-text" th:utext="${content.html}"></div>
+        <th:block th:replace="~{modules/moment/common :: media}"></th:block>
+      </div>
+
+      <footer class="moment-footer">
+        <div th:if="${not #lists.isEmpty(moment.spec.tags)}" class="moment-tags">
+          <a th:each="tag : ${moment.spec.tags}" th:href="@{/moments(tag=${tag})}" class="moment-tag">
+            <span>#</span><span th:text="${tag}"></span>
+          </a>
+        </div>
+        <div class="moment-actions">
+          <th:block th:replace="~{modules/moment/common :: like-button}"></th:block>
+          <a href="#comment" class="action-btn comment" title="查看评论">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <span th:text="${moment.stats.approvedComment ?: 0}">0</span>
+          </a>
+          <th:block th:replace="~{modules/moment/common :: share-button(url='')}"></th:block>
+        </div>
+      </footer>
+    </article>
+  </th:block>
+
+  <!--/* ========== 列表模式详情页 ========== */-->
+  <th:block th:if="${momentsConfig != null and momentsConfig.template == 'list'}">
+    <div class="moment-back moment-back-simple">
+      <a href="/moments" class="back-link">← 返回瞬间</a>
+    </div>
+
+    <article class="moment-detail-list" style="--delay: 0.1s">
+      <header class="moment-header">
+        <img th:if="${moment.owner != null and moment.owner.avatar != null}"
+             th:src="${moment.owner.avatar}"
+             th:alt="${moment.owner.displayName}"
+             class="author-avatar"
+             loading="lazy" />
+        <div th:if="${moment.owner != null}" class="author-name">
+          <span th:text="${moment.owner.displayName}">作者</span>
+          <time class="moment-time"
+                th:datetime="${moment.spec.releaseTime}"
+                th:text="${#temporals.format(moment.spec.releaseTime, 'yyyy-MM-dd HH:mm')}">时间</time>
+        </div>
+      </header>
+
+      <div class="moment-body">
+        <div th:if="${not #strings.isEmpty(content.html)}" class="moment-text" th:utext="${content.html}"></div>
+        <th:block th:replace="~{modules/moment/common :: media}"></th:block>
+      </div>
+
+      <footer class="moment-footer">
+        <div th:if="${not #lists.isEmpty(moment.spec.tags)}" class="moment-tags">
+          <a th:each="tag : ${moment.spec.tags}" th:href="@{/moments(tag=${tag})}" class="moment-tag">
+            <span>#</span><span th:text="${tag}"></span>
+          </a>
+        </div>
+        <div class="moment-actions">
+          <th:block th:replace="~{modules/moment/common :: like-button}"></th:block>
+          <a href="#comment" class="action-btn comment" title="查看评论">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <span th:text="${moment.stats.approvedComment ?: 0}">0</span>
+          </a>
+          <th:block th:replace="~{modules/moment/common :: share-button(url='')}"></th:block>
+        </div>
+      </footer>
+    </article>
+  </th:block>
+
+  <!-- 评论区 -->
+  <div class="moment-comments" id="comment">
+    <th:block
+      th:replace="~{modules/common/comment :: comment(title='评论区', haloComment=${ {group: 'moment.halo.run', kind: 'Moment', name: moment.metadata.name} })}"
+    ></th:block>
+  </div>
+
+</th:block>
+</html>

@@ -1,0 +1,16 @@
+<th:block th:fragment="pagination(data)">
+  <nav class="pager" th:if="${data.totalPages > 1}">
+    <a class="pager-btn" th:if="${data.hasPrevious}" th:href="@{${data.prevUrl}}"
+       data-i18n-key="prev_page">‹ 上一页</a>
+    <span class="pager-info" data-i18n-key="page_info"
+          th:attr="data-i18n-param-page=${data.page},data-i18n-param-total=${data.totalPages}">
+      <span th:remove="tag" th:text="${data.page}"></span> / <span th:remove="tag" th:text="${data.totalPages}"></span>
+    </span>
+    <a class="pager-btn" th:if="${data.hasNext}" th:href="@{${data.nextUrl}}"
+       data-i18n-key="next_page">下一页 ›</a>
+  </nav>
+</th:block>
+
+<th:block th:fragment="paginationIndex(data)">
+  <th:block th:replace="~{modules/pagination :: pagination(data=${data})}" />
+</th:block>

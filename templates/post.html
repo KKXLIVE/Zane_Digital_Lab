@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{layout :: html(head = null,content = ~{::content})}">
+<th:block th:fragment="content">
+
+  <div class="post-h">
+    <div class="post-h-inner">
+      <a th:href="@{/}" class="post-back" data-i18n-key="back_home">← 返回首页</a>
+      <h1 class="post-title" th:text="${post.spec.title}">标题</h1>
+      <div class="post-meta">
+        <time th:datetime="${post.spec.publishTime}"
+              th:attr="data-i18n-date=${post.spec.publishTime}"
+              th:text="${#temporals.format(post.spec.publishTime, 'yyyy年MM月dd日')}">2024-01-01</time>
+        <span th:if="${post.spec.categories}" th:each="cat : ${post.spec.categories}" class="post-cat" th:text="${cat}">分类</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 三栏布局：TOC | 正文 | 侧边栏 -->
+  <div class="post-layout">
+
+    <!-- ===== 左：文章目录 ===== -->
+    <aside class="post-side post-side-left" id="postToc">
+      <div class="side-sticky">
+        <h3 class="side-title" data-i18n-key="table_of_contents">📖 目录</h3>
+        <nav class="toc-nav" id="tocNav"></nav>
+      </div>
+    </aside>
+
+    <!-- ===== 中：正文 ===== -->
+    <div class="post-main">
+
+      <!-- 过时文章提示 -->
+      <th:block th:replace="~{modules/post/outdated-notice :: outdated-notice(${post}, ${theme})}"></th:block>
+
+      <!-- 打字机摘要 -->
+      <th:block th:replace="~{modules/post/excerpt :: excerpt(${post}, ${theme})}"></th:block>
+
+      <div class="post-body tp" th:utext="${post.content.content}"></div>
+
+      <!-- 文章标签 -->
+      <div class="post-tags" th:if="${post.tags}">
+        <span class="post-tags-label" data-i18n-key="tags_label">标签：</span>
+        <a class="post-tag" th:each="tag : ${post.tags}" th:href="${tag.status.permalink}" th:text="${tag.spec.displayName}">tag</a>
+      </div>
+
+      <!-- 上下篇 -->
+      <nav class="post-nav" th:if="${prevPost} or ${nextPost}">
+        <div class="pn-grid">
+          <a class="pn" th:if="${prevPost}" th:href="@{${prevPost.status.permalink}}">
+            <div class="pn-label" data-i18n-key="prev_post">← 上一篇</div>
+            <div class="pn-title" th:text="${prevPost.spec.title}">上一篇</div>
+          </a>
+          <a class="pn next" th:if="${nextPost}" th:href="@{${nextPost.status.permalink}}">
+            <div class="pn-label" data-i18n-key="next_post">下一篇 →</div>
+            <div class="pn-title" th:text="${nextPost.spec.title}">下一篇</div>
+          </a>
+        </div>
+      </nav>
+
+      <!-- 评论 -->
+      <div class="post-comments" id="comments">
+        <th:block th:replace="~{modules/common/comment :: comment('评论', ${haloComment})}"></th:block>
+      </div>
+    </div>
+
+    <!-- ===== 右：侧边栏 ===== -->
+    <aside class="post-side post-side-right">
+      <div class="side-sticky">
+        <!-- 作者卡片（当前文章作者） -->
+        <th:block th:with="contributor = ${post.owner != null and post.owner.name != null} ? ${contributorFinder.getContributor(post.owner.name)} : null">
+          <div class="side-author" th:if="${contributor != null}">
+            <div class="side-author-avatar" th:if="${contributor.avatar}" th:style="'background-image:url(' + ${contributor.avatar} + ');background-size:cover;background-position:center'">
+              <img th:src="${contributor.avatar}" th:alt="${contributor.displayName}" style="display:none" />
+            </div>
+            <div class="side-author-avatar" th:unless="${contributor.avatar}" th:text="${#strings.substring(contributor.displayName, 0, 1)}">A</div>
+            <div class="side-author-name" th:text="${contributor.displayName}">作者</div>
+            <p class="side-author-bio" th:if="${contributor.bio}" th:text="${contributor.bio}">描述</p>
+          </div>
+          <div class="side-author" th:unless="${contributor != null}">
+            <div class="side-author-avatar" th:text="${site.title} != null ? ${#strings.substring(site.title, 0, 1)} : 'A'">A</div>
+            <div class="side-author-name" th:text="${site.title}">zhiqixiaozhu</div>
+          </div>
+        </th:block>
+
+        <!-- 文章标签 -->
+        <h3 class="side-title" data-i18n-key="tags_label">🏷️ 标签</h3>
+        <div class="side-tags" th:if="${post.tags}">
+          <a class="side-tag" th:each="tag : ${post.tags}" th:href="${tag.status.permalink}" th:text="${tag.spec.displayName}">tag</a>
+        </div>
+        <div class="side-tags" th:unless="${post.tags}">
+          <span class="side-tag empty" data-i18n-key="no_tags">暂无标签</span>
+        </div>
+
+        <!-- 文章统计 -->
+        <h3 class="side-title" data-i18n-key="stats_title">📊 统计</h3>
+        <div class="side-stats">
+          <div class="side-stat">
+            <span class="side-stat-num" th:text="${post.stats?.visit ?: 0}">0</span>
+            <span class="side-stat-label" data-i18n-key="stats_views">访问量</span>
+          </div>
+        </div>
+
+        <!-- 快捷操作 -->
+        <h3 class="side-title" data-i18n-key="quick_links">🔗 快捷链接</h3>
+        <div class="side-quick">
+          <a th:href="@{/archives}" data-i18n-key="archives_link">文章归档</a>
+          <a th:href="@{/tags}" data-i18n-key="tags_link">标签云</a>
+          <a th:href="@{/categories}" data-i18n-key="categories_link">全部分类</a>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+</th:block>
+</html>

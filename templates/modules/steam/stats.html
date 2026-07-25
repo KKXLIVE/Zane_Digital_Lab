@@ -1,0 +1,12 @@
+<th:block th:fragment="stats">
+  <section class="steam-stats" th:if="${stats != null}">
+    <div class="steam-stat-item">
+      <span class="steam-stat-value" th:text="${stats.totalGames}">0</span>
+      <span class="steam-stat-label">游戏总数</span>
+    </div>
+    <div class="steam-stat-item">
+      <span class="steam-stat-value" th:text="${stats.totalPlaytimeFormatted}">0h</span>
+      <span class="steam-stat-label">总时长</span>
+    </div>
+  </section>
+</th:block>

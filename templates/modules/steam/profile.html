@@ -1,0 +1,15 @@
+<th:block th:fragment="profile">
+  <section class="steam-profile" th:if="${profile != null}" th:with="p=${profile}">
+    <div class="steam-profile-avatar">
+      <img th:src="${p?.summary?.avatarFull}" th:alt="${p?.summary?.personaName}" alt="Avatar" loading="lazy" />
+    </div>
+    <div class="steam-profile-info">
+      <h2 class="steam-profile-name" th:text="${p?.summary?.personaName}">Steam User</h2>
+      <a th:href="${p?.summary?.profileUrl}" target="_blank" class="steam-profile-link">查看 Steam 资料</a>
+      <div class="steam-profile-status">
+        <span class="steam-status" th:text="${p?.statusText}">在线</span>
+        <span class="steam-level" th:if="${p?.steamLevel}">Lv. <span th:text="${p?.steamLevel}">0</span></span>
+      </div>
+    </div>
+  </section>
+</th:block>

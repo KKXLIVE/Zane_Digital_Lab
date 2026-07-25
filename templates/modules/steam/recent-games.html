@@ -1,0 +1,16 @@
+<th:block th:fragment="recent-games">
+  <section class="steam-section" th:if="${recentGames != null and not #lists.isEmpty(recentGames)}">
+    <h3 class="steam-section-title">最近游玩</h3>
+    <div class="steam-recent-grid">
+      <div class="steam-game-card" th:each="game : ${recentGames}">
+        <a th:href="'https://store.steampowered.com/app/' + ${game.appId}" target="_blank" class="steam-game-link">
+          <img th:src="${game.headerImageUrl}" th:alt="${game.name}" loading="lazy" class="steam-game-img" />
+          <div class="steam-game-meta">
+            <span class="steam-game-name" th:text="${game.name}">Game</span>
+            <span class="steam-game-time" th:text="${game.playtime2WeeksFormatted}">0h</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+</th:block>

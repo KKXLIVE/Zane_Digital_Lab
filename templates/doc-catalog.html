@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{layout :: html(head = null, content = ~{::content})}">
+<th:block th:fragment="content">
+  <div class="doc-page">
+    <!-- 面包屑导航 -->
+    <nav class="doc-breadcrumb" th:if="${crumbs != null and not #lists.isEmpty(crumbs)}">
+      <a th:href="@{${project.status.permalink}}" th:text="${project.spec.displayName}">项目</a>
+      <th:block th:each="crumb : ${crumbs}">
+        <span class="breadcrumb-sep">/</span>
+        <a th:href="@{${crumb.status.permalink}}" th:text="${crumb.spec.title}">路径</a>
+      </th:block>
+    </nav>
+
+    <main class="doc-main">
+      <h1 class="doc-title" th:text="${docTree.spec.title}">目录标题</h1>
+
+      <!-- 子节点列表 -->
+      <div class="doc-catalog-list" th:if="${sonNodes != null}">
+        <a th:each="node : ${sonNodes}"
+           th:href="@{${node.status.permalink}}"
+           class="doc-catalog-item">
+          <span class="doc-catalog-icon" th:text="${node.spec.type == 'TREE' ? '📂' : '📄'}"></span>
+          <span class="doc-catalog-title" th:text="${node.spec.title}">节点标题</span>
+        </a>
+      </div>
+
+      <div class="empty-state" th:if="${sonNodes == null or #lists.isEmpty(sonNodes)}">
+        <p>此目录暂无内容</p>
+      </div>
+    </main>
+
+    <!-- 文档树侧边栏 -->
+    <th:block th:replace="~{modules/doc/doc-tree :: doc-tree}"></th:block>
+  </div>
+
+</th:block>
+</html>

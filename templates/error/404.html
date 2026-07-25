@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{layout :: html(head = null,content = ~{::content})}">
+<th:block th:fragment="content">
+  <div class="e404">
+    <div class="e404-bg" aria-hidden="true">
+      <span class="e404-bg-digit">4</span>
+      <span class="e404-bg-digit zero">0</span>
+      <span class="e404-bg-digit">4</span>
+    </div>
+    <div class="e404-body">
+      <div class="e404-code">
+        <span>4</span><span class="e404-zero">0</span><span>4</span>
+      </div>
+      <h1 class="e404-title"
+          data-i18n-key="e404_title"
+          th:text="${#strings.defaultString(error.title, '页面未找到')}">页面未找到</h1>
+      <p class="e404-desc"
+         data-i18n-key="e404_desc"
+         th:text="${#strings.defaultString(error.detail, '你寻找的页面可能已被移除或地址已更改')}">这里空空的</p>
+      <div class="e404-actions">
+        <a class="e404-btn primary" th:href="@{/}" data-i18n-key="e404_btn_home">返回首页</a>
+        <a class="e404-btn" th:href="@{/archives}" data-i18n-key="e404_btn_archives">看看归档</a>
+      </div>
+    </div>
+  </div>
+</th:block>
+</html>

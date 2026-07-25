@@ -1,0 +1,17 @@
+<th:block th:fragment="games-grid">
+  <section class="steam-section" th:if="${games != null and games.items != null and not #lists.isEmpty(games.items)}">
+    <h3 class="steam-section-title">游戏库</h3>
+    <div class="steam-games-grid">
+      <div class="steam-game-card" th:each="game : ${games.items}">
+        <a th:href="'https://store.steampowered.com/app/' + ${game.appId}" target="_blank" class="steam-game-link">
+          <img th:src="${game.headerImageUrl}" th:alt="${game.name}" loading="lazy" class="steam-game-img" />
+          <div class="steam-game-meta">
+            <span class="steam-game-name" th:text="${game.name}">Game</span>
+            <span class="steam-game-time" th:text="${game.playtimeFormatted}">0h</span>
+          </div>
+        </a>
+      </div>
+    </div>
+    <th:block th:replace="~{modules/pagination :: pagination(data=${games})}"></th:block>
+  </section>
+</th:block>

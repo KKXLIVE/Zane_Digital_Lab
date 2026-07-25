@@ -1,0 +1,6 @@
+<th:block th:fragment="error">
+  <div class="steam-error" th:if="${profile == null or recentGames == null or stats == null or games == null}">
+    <span class="steam-error-icon">⚠️</span>
+    <span class="steam-error-text">部分 Steam 数据加载失败，请检查插件配置或稍后刷新重试。</span>
+  </div>
+</th:block>

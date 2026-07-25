@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{layout :: html(head = null, content = ~{::content})}">
+<th:block th:fragment="content">
+  <div class="doc-page">
+    <!-- 面包屑导航 -->
+    <nav class="doc-breadcrumb" th:if="${crumbs != null and not #lists.isEmpty(crumbs)}">
+      <a th:href="@{${project.status.permalink}}" th:text="${project.spec.displayName}">项目</a>
+      <th:block th:each="crumb : ${crumbs}">
+        <span class="breadcrumb-sep">/</span>
+        <a th:href="@{${crumb.status.permalink}}" th:text="${crumb.spec.title}">路径</a>
+      </th:block>
+    </nav>
+
+    <main class="doc-main">
+      <h1 class="doc-title" th:text="${docTree.spec.title}">文档标题</h1>
+
+      <div class="doc-content tp" th:if="${docTree.spec.content != null}" th:utext="${docTree.spec.content}"></div>
+
+      <!-- 上下篇导航 -->
+      <nav class="doc-nav-surround" th:if="${linkNavigation != null}">
+        <a th:if="${linkNavigation.hasPrevious}" th:href="@{${linkNavigation.previous.link}}" class="surround-link prev">
+          <span class="surround-label">← 上一篇</span>
+          <span class="surround-title" th:text="${linkNavigation.previous.title}">上一篇</span>
+        </a>
+        <a th:if="${linkNavigation.hasNext}" th:href="@{${linkNavigation.next.link}}" class="surround-link next">
+          <span class="surround-label">下一篇 →</span>
+          <span class="surround-title" th:text="${linkNavigation.next.title}">下一篇</span>
+        </a>
+      </nav>
+
+      <!-- 评论 -->
+      <div class="doc-comments" th:if="${project?.spec?.enableComment == true}" id="comment">
+        <halo:comment group="run.halo.docsme" kind="Doc" th:attr="name=${docTree.metadata.name}" />
+      </div>
+    </main>
+
+    <!-- 文档树侧边栏 -->
+    <th:block th:replace="~{modules/doc/doc-tree :: doc-tree}"></th:block>
+  </div>
+
+</th:block>
+</html>

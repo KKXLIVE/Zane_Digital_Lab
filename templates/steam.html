@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{layout :: html(head = null, content = ~{::content})}">
+<th:block th:fragment="content">
+  <div class="steam-page">
+    <div class="page-header steam-header">
+      <h1 class="page-title" data-i18n-key="steam_title">🎮 Steam</h1>
+    </div>
+
+    <!-- Steam 个人资料 -->
+    <th:block th:replace="~{modules/steam/profile :: profile}"></th:block>
+
+    <!-- 游戏时长统计 -->
+    <th:block th:replace="~{modules/steam/stats :: stats}"></th:block>
+
+    <!-- 最近游玩 -->
+    <th:block th:replace="~{modules/steam/recent-games :: recent-games}"></th:block>
+
+    <!-- 游戏库 -->
+    <th:block th:replace="~{modules/steam/games-grid :: games-grid}"></th:block>
+
+    <!-- 错误提示 -->
+    <th:block th:replace="~{modules/steam/error :: error}"></th:block>
+  </div>
+
+</th:block>
+</html>
