@@ -1,0 +1,32 @@
+# ============================================================
+# 本地 Halo 预览站（主题开发实时预览）
+# ------------------------------------------------------------
+# 用法：
+#   启动  docker compose up -d     （或 ./preview.sh start）
+#   停止  docker compose down      （或 ./preview.sh stop）
+#   日志  docker compose logs -f   （或 ./preview.sh logs）
+# 然后浏览器打开 http://localhost:8090
+#
+# 说明：
+#   - 镜像版本与线上 zanecarter.top 一致（Halo 2.20.21）
+#   - SPRING_THYMELEAF_CACHE=false 关闭模板缓存：改模板文件后刷新页面即可实时生效
+#   - 主题源码通过 bind mount 直接挂载，本地改文件 = 线上改动，无需重新上传
+#   - 预览数据（H2 数据库、设置）存在 ./halo-data，不影响线上博客
+# ============================================================
+services:
+  halo:
+    image: halohub/halo:2.20.21
+    container_name: halo-preview
+    restart: unless-stopped
+    ports:
+      - "8090:8090"
+    environment:
+      # 关闭 Thymeleaf 模板缓存，实现「改文件 → 刷新即生效」
+      - SPRING_THYMELEAF_CACHE=false
+      # 预览站内存占用调小一点（可选）
+      - JVM_OPTS=-Xmx256m -Xms256m
+    volumes:
+      # Halo 工作目录（H2 数据库、配置文件）
+      - ./halo-data:/root/.halo2
+      # 挂载本主题源码：容器内文件夹名必须与 theme.yaml 的 metadata.name 一致
+      - .:/root/.halo2/themes/theme-aurora
