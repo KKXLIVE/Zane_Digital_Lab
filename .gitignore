@@ -1,0 +1,10 @@
+# macOS 系统文件
+.DS_Store
+
+# 本地工具目录（非主题内容）
+.arts/
+.codeartsdoer/
+node_modules/
+
+# 网页存档（浏览器保存的渲染页面，勿提交）
+/category.html
