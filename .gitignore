@@ -11,3 +11,5 @@ node_modules/
 
 # 本地预览站数据（H2 数据库等，勿提交）
 halo-data/
+# PostgreSQL 数据卷（勿提交）
+pg-data/

@@ -15,7 +15,7 @@ case "${1:-start}" in
     docker compose up -d
     echo ""
     echo "✅ 预览站已启动：http://localhost:8090"
-    echo "   首次使用：完成管理员设置后，进入 主题 → 未安装 → 安装并启用 theme-aurora"
+    echo "   首次使用：完成管理员设置后，进入 主题 → 未安装 → 安装并启用 theme-kukuxin"
     echo "   详细步骤见 PREVIEW.md"
     ;;
   stop|down)

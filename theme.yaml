@@ -1,22 +1,22 @@
 apiVersion: theme.halo.run/v1alpha1
 kind: Theme
 metadata:
-  name: theme-aurora
+  name: theme-kukuxin
 spec:
-  displayName: Aurora
+  displayName: KukuXin
   author:
-    name: zhiqixiaozhu
-    website: https://www.halosb.com/
-  description: 精致、温暖、有呼吸感的个人空间
-  logo: https://www.halosb.com/upload/cover-1777443073469.webp
-  homepage: https://www.halosb.com/
-  settingName: "theme-aurora-setting"
-  configMapName: "theme-aurora-configmap"
+    name: KKXLIVE
+    website: https://zanecarter.top/
+  description: 以代码探索未来，以创造连接世界 ❀
+  logo: https://zanecarter.top/upload/IMG_0026.jpeg
+  homepage: https://zanecarter.top/
+  settingName: "theme-kukuxin-setting"
+  configMapName: "theme-kukuxin-configmap"
   version: "5.3.2"
   requires: ">=2.0.0"
   license:
     - name: "GPL-3.0"
-      url: "https://github.com/halosb/theme-aurora/blob/main/LICENSE"
+      url: "https://github.com/KKXLIVE/Zane_Digital_Lab/blob/main/LICENSE"
   customTemplates:
     page:
       - name: 关于页面

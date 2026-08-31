@@ -1,8 +1,8 @@
-# Aurora_kukuxin
+# KukuXin
 
 以代码探索未来，以创造连接世界 ❀。
 
-Aurora_kukuxin 博客主题修改于Aurora 原作者冬季限定栖（加入QQ群https://qm.qq.com/q/dbqrRmp9Qc），注重阅读体验与视觉细节，提供丰富的插件页面支持和灵活的后台配置。
+KukuXin 博客主题修改于 Aurora 原作者冬季限定栖（加入QQ群https://qm.qq.com/q/dbqrRmp9Qc），注重阅读体验与视觉细节，提供丰富的插件页面支持和灵活的后台配置。
 
 > **预览站**：[https://zanecarter.top/]
 > **反馈邮箱**：[kukuxin@petalmail.com]

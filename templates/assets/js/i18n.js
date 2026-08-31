@@ -1,5 +1,5 @@
 /**
- * Aurora i18n — 全局语言切换（中/英/日/韩）
+ * KukuXin i18n — 全局语言切换（中/英/日/韩）
  */
 (function () {
   'use strict';

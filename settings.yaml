@@ -1,7 +1,7 @@
 apiVersion: v1alpha1
 kind: Setting
 metadata:
-  name: theme-aurora-setting
+  name: theme-kukuxin-setting
 spec:
   forms:
     - group: theme_mode_group
@@ -31,7 +31,7 @@ spec:
         - $formkit: text
           name: hero_title
           label: 大标题
-          value: "Aurora"
+          value: "KukuXin"
         - $formkit: text
           name: hero_subtitle
           label: 副标题
@@ -194,7 +194,7 @@ spec:
         - $formkit: textarea
           name: meta_description
           label: Meta Description
-          value: "Aurora — 精致、温暖、有呼吸感的个人空间"
+          value: "KukuXin — 以代码探索未来，以创造连接世界"
 
     - group: post
       label: 文章设置

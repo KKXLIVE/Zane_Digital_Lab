@@ -1,5 +1,5 @@
 /**
- * Aurora 4.0 — main
+ * KukuXin — main
  */
 document.addEventListener('DOMContentLoaded', () => {
   'use strict';
